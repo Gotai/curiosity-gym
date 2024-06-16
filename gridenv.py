@@ -2,118 +2,190 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 import pygame
+from abc import ABC, abstractmethod
+from constants import OBJECT_TO_IDX
+from agentpov import AgentPOV
+from objects import GridObject
+import objects as ob
 
-class GridEnv(gym.Env):
+class GridEnv(gym.Env, ABC):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
-    
-    def __init__(self, agentview=None, size=5, windowsize=512, render_mode=None, max_steps=30):
-        self.size = size
-        self.agent_view = agentview
-        #self.action_space = self.agent_view.get_action_space()
-        self.window_size = windowsize
+
+    def __init__(
+        self,
+        agentPOV: AgentPOV,
+        max_steps: int = 50,
+        width: int = 10,
+        height: int = 10,
+        reward_range: tuple = (0,1),
+        render_mode: str | None = None,
+        window_width: int = 512,
+    ):
+        # Get Action & Observations spaces
+        self.agentPOV = agentPOV
+        self.action_space = agentPOV.action_space
+        self.observation_space = agentPOV.observation_space
+
+        # Configure Env
+        self.max_steps = max_steps
+        self.reward_range = reward_range
+        self.width = width
+        self.height = height
+        self.map_layout = self._init_map()
+        self.objects = self._init_objects()
+        self.agent = self._init_agent()
+        
+        # Configure Rendering
         self.render_mode = render_mode
+        self.window_width = window_width
+        self.window_height = window_width * (self.height / self.width)
+        self.tile_size = window_width / self.width
         self.window = None
         self.clock = None
-        self.max_steps = max_steps
+
+
+    @abstractmethod
+    def _init_objects(self) -> np.ndarray:
+        pass
+    
+    @abstractmethod
+    def _init_map(self) -> np.ndarray:
+        pass
+    
+    @abstractmethod
+    def _init_agent(self) -> GridObject:
+        pass
+    
+    @abstractmethod
+    def _get_reward(self) -> int:
+        pass
+    
+    @abstractmethod
+    def _get_terminated(self) -> bool:
+        if self.step_count >= self.max_steps:
+            return True
+    
+    def reset(self, seed: int | None=None, options = None):
+        super().reset(seed=seed)
+        self.step_count = 0
+        for object in self.objects:
+            object.reset()
+        self.agent.reset()
+        return (self._get_obs(), self._get_info())
 
     def _get_obs(self):
-        #return self.agent_view.get_obs()
-        return {"agent_pos": self._agent_location, "agent_rot": self._agent_rotation, "target": self._target_location}
-
-    # probably by overloaded by concrete env
-    def reset(self):
-        self.steps = 0
-        self._agent_location = np.array([0,0]) # x, y coordinates in grid
-        self._agent_rotation = np.array([1,0]) # rotation (horizontal, vertical)
-        self._target_location = np.array([5,5]) # target location x, y
-
-        return self._get_obs()
+        return self.agentPOV.transform_obs(self.get_state(), self.agent)
+    
+    def _get_info(self):
+        return {}
     
     def step(self, action):
-        
-        self.steps += 1
+        self.step_count += 1
 
-        if action == 0:
-            self._agent_location = np.clip(
-                self._agent_location + self._agent_rotation * np.array([1,-1]), 0, self.size-1)
+        front = self.agent.position + self.agent.rotation * np.array([1,-1])
+        if action == 0 and self.check_walkable(front):
+            self.agent.position = front
 
-        elif action == 1:
-            self._agent_rotation = np.array([self._agent_rotation[1], self._agent_rotation[0]*-1])
+        if action == 1:
+            self.agent.rotate(np.array([1,-1]))
 
-        elif action == 2:
-            self._agent_rotation = np.array([self._agent_rotation[1]*-1, self._agent_rotation[0]])
+        if action == 2:
+            self.agent.rotate(np.array([-1,1]))
+
+        if action == 3:
+            object = self.find_object(front)
+            if object:
+                object.interact(self.agent)
 
         if self.render_mode == "human":
             self._render_frame()
 
-        return self._get_obs(), self._get_reward(), self._get_terminated(), False, []
+        return self._get_obs(), self._get_reward(), self._get_terminated(), False, self._get_info()
     
-    def _get_reward(self):
-        return 1 if np.array_equal(self._agent_location, self._target_location) else 0
+
+    def check_walkable(self, position) -> bool:
+        if position[0] >= self.width or position[1] >= self.height:
+            return False
+        
+        if position[0] < 0 or position[1] < 0:
+            return False
+        
+        for wall in self.map_layout:
+            if np.all(wall.position == position):
+                return False
+            
+        for object in self.objects:
+            if np.all(object.position == position) and not object.walkable():
+                return False
+        return True
     
-    def _get_terminated(self):
-        return True if np.array_equal(self._agent_location, self._target_location) or self.steps >= self.max_steps else False
+    def find_object(self, position) -> GridObject | None:
+        for object in self.objects:
+            if np.all(object.position == position):
+                return object
+        return None
+    
+    def load_map(self, positions):
+        map = []
+        for position in positions:
+            map.append(ob.Wall(position))
+        return map
+    
+    def get_state(self):
+        state = np.zeros([self.width * self.height, 3])
+        for object in np.concatenate((self.map_layout, self.objects, np.array([self.agent]))):
+            x,y = object.position
+            state[x + y*self.width] = np.array([
+                OBJECT_TO_IDX[object.name],
+                object.color,
+                object.state,
+                ])
+        return state
 
     def render(self):
         if self.render_mode == "rgb_array":
             return self._render_frame()
-
-
+        
     def _render_frame(self):
         if self.window is None and self.render_mode == "human":
             pygame.init()
             pygame.display.init()
-            self.window = pygame.display.set_mode((self.window_size, self.window_size))
+            self.window = pygame.display.set_mode((self.window_width, self.window_height))
+        
         if self.clock is None and self.render_mode == "human":
             self.clock = pygame.time.Clock()
 
-        canvas = pygame.Surface((self.window_size, self.window_size))
+        canvas = pygame.Surface((self.window_width, self.window_height))
         canvas.fill((255, 255, 255))
-        pix_square_size = (
-            self.window_size / self.size
-        )  # The size of a single grid square in pixels
 
-        # Draw target
-        pygame.draw.rect(
-            canvas,
-            (41, 191, 18),
-            pygame.Rect(
-                pix_square_size * self._target_location,
-                (pix_square_size, pix_square_size),
-            ),
-        )
+        # Draw walls
+        for wall in self.map_layout:
+            wall.render(canvas, self.tile_size)
 
-        # Calculate points for triangle rotation
-        c = np.array([0.5, 0.5])
-        d = 0.35
-        r = self._agent_rotation
-        p1 = (self._agent_location + c - np.array([-d, d]) * r) * pix_square_size
-        p2 = (self._agent_location + c - [d, -d] * np.flip(r) + [-d, d] * r ) * pix_square_size
-        p3 = (self._agent_location + c + [d, -d] * np.flip(r) + [-d, d] * r ) * pix_square_size
+        # Draw objects
+        for object in self.objects:
+            object.render(canvas, self.tile_size)
 
-        # Draw agent
-        pygame.draw.polygon(
-            canvas,
-            (255,153,20),
-            (p1, p2, p3),
-            0 # filled triangle
-        )
+        # Draw Agent
+        self.agent.render(canvas, self.tile_size)
 
         # Grid lines 
         line_color = (210, 210, 210)
-        for x in range(self.size + 1):
+        for x in range(self.height + 1):
             pygame.draw.line(
                 canvas,
                 line_color,
-                (0, pix_square_size * x),
-                (self.window_size, pix_square_size * x),
+                (0, self.tile_size * x),
+                (self.window_width, self.tile_size * x),
                 width=3,
             )
+        
+        for y in range(self.width + 1):  
             pygame.draw.line(
                 canvas,
                 line_color,
-                (pix_square_size * x, 0),
-                (pix_square_size * x, self.window_size),
+                (self.tile_size * y, 0),
+                (self.tile_size * y, self.window_height),
                 width=3,
             )
 
@@ -127,8 +199,8 @@ class GridEnv(gym.Env):
         else:  # rgb_array
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2))
-
-        def close(self):
-            if self.window is not None:
-                pygame.display.quit()
-                pygame.quit()
+   
+    def close(self):
+        if self.window is not None:
+            pygame.display.quit()
+            pygame.quit()
