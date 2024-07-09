@@ -1,36 +1,47 @@
+from abc import ABC, abstractmethod
 import gymnasium as gym
 import numpy as np
-from gymnasium import spaces
 import pygame
-from abc import ABC, abstractmethod
 from constants import OBJECT_TO_IDX
 from agentpov import AgentPOV
 from objects import GridObject
 import objects as ob
 
 class GridEnv(gym.Env, ABC):
+    """Abstract base class for 2D grid world gymnasium environments.
+
+    :param gym: _description_
+    :type gym: _type_
+    :param ABC: _description_
+    :type ABC: _type_
+    :return: _description_
+    :rtype: _type_
+    """
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
     def __init__(
         self,
-        agentPOV: AgentPOV,
-        max_steps: int = 50,
-        width: int = 10,
-        height: int = 10,
-        reward_range: tuple = (0,1),
+        agent_pov: AgentPOV,
+        
+        # max_steps: int = 50,
+        # width: int = 10,
+        # height: int = 10,
+        # reward_range: tuple = (0,1),
+        
         render_mode: str | None = None,
         window_width: int = 512,
     ):
         # Get Action & Observations spaces
-        self.agentPOV = agentPOV
-        self.action_space = agentPOV.action_space
-        self.observation_space = agentPOV.observation_space
+        self.agent_pov = agent_pov
+        self.action_space = agent_pov.action_space
+        self.observation_space = agent_pov.observation_space
 
         # Configure Env
         self.max_steps = max_steps
         self.reward_range = reward_range
         self.width = width
         self.height = height
+        
         self.map_layout = self._init_map()
         self.objects = self._init_objects()
         self.agent = self._init_agent()
@@ -74,7 +85,7 @@ class GridEnv(gym.Env, ABC):
         return (self._get_obs(), self._get_info())
 
     def _get_obs(self):
-        return self.agentPOV.transform_obs(self.get_state(), self.agent)
+        return self.agent_pov.transform_obs(self.get_state(), self.agent)
     
     def _get_info(self):
         return {}

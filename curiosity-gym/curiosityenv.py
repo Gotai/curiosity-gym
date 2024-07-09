@@ -3,8 +3,8 @@ import objects as ob
 import numpy as np
 from agentpov import TwoFrontView
 from constants import TWO_ROOMS_MAP
-from grid import Grid
 from agentpov import AgentPOV
+from typing import override
 
 class CuriousNavigation(GridEnv):
     
@@ -39,4 +39,3 @@ class CuriousNavigation(GridEnv):
         if super()._get_terminated() or np.all(self.target.position == self.agent.position):
              return True
         return False
-        

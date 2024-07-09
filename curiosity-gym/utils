@@ -1,0 +1,73 @@
+"""Utility classes.
+
+This module provides classes to store and manage settings for the :class:`gridenv.GridEnv 
+environments. It contains the following classes:
+    
+    * EnvironmentSettings
+
+"""
+
+import objects
+
+class EnvironmentSettings():
+    """A class to store settings of :class:`gridenv.GridEnv environments.
+    
+    Attributes
+    ----------
+    max_steps : int 
+        Maximum number of actions for an agent to take until the environment terminates.
+    map_size: (int, int)
+        Tupel of width and height corresponding to the number of cells along each axis of the
+        grid world map.
+    reward_range: (int, int)
+        Tupel of minimum and maximum total reward values throughout an episode in the environment.
+    walls: [:class:`objects.Wall]y
+        Iterable containing :class:`objects.Wall objects that define walls in the environment. 
+
+    """
+
+    def __init__(
+            self,
+            max_steps: int = 50,
+            map_size: tuple[int,int] = (10,10),
+            reward_range: tuple[int,int] = (0,1),
+            wall_positions: list[objects.Wall] = (),
+    ):
+        """Constructor of :class:`utils.EnvironmentSettings.
+
+        Parameters
+        ----------
+        max_steps : int
+            Maximum number of actions for an agent to take until the environment terminates.
+        map_size : tuple[int,int], optional
+            Tupel of width and height corresponding to the number of cells along each axis of the
+            grid world map, by default (10,10)
+        reward_range : tuple[int,int], optional
+            _description_, by default (0,1)
+        wall_positions : list[objects.Wall], optional
+            _description_, by default ()
+        """
+
+        self.max_steps = max_steps
+        self.map_size = map_size
+        self.reward_range = reward_range
+        self.walls = self.init_walls(wall_positions)
+
+    def init_walls(self, wall_positions: list[tuple[int,int]]) -> list[objects.Wall]:
+        """Loads the positions of walls for an environment.
+
+        Parameters
+        ----------
+        wall_positions : list[tuple[int,int]]
+            Positions of walls as tuple of x,y values.
+
+        Returns
+        -------
+        list[objects.Wall]
+            List of all Wall objects for an environment.
+        """
+
+        walls = []
+        for pos in wall_positions:
+            walls.append(objects.Wall(pos))
+        return walls
