@@ -6,6 +6,7 @@ from constants import OBJECT_TO_IDX
 from agentpov import AgentPOV
 from objects import GridObject
 import objects as ob
+from utils import EnvironmentSettings
 
 class GridEnv(gym.Env, ABC):
     """Abstract base class for 2D grid world gymnasium environments.
@@ -22,30 +23,26 @@ class GridEnv(gym.Env, ABC):
     def __init__(
         self,
         agent_pov: AgentPOV,
-        
-        # max_steps: int = 50,
-        # width: int = 10,
-        # height: int = 10,
-        # reward_range: tuple = (0,1),
-        
+        env_settings: EnvironmentSettings,
         render_mode: str | None = None,
         window_width: int = 512,
     ):
+
         # Get Action & Observations spaces
         self.agent_pov = agent_pov
         self.action_space = agent_pov.action_space
         self.observation_space = agent_pov.observation_space
 
         # Configure Env
-        self.max_steps = max_steps
-        self.reward_range = reward_range
-        self.width = width
-        self.height = height
-        
+        self.max_steps = env_settings.max_steps
+        self.reward_range = env_settings.reward_range
+        self.width = env_settings.width
+        self.height = env_settings.heigth
+
         self.map_layout = self._init_map()
         self.objects = self._init_objects()
         self.agent = self._init_agent()
-        
+
         # Configure Rendering
         self.render_mode = render_mode
         self.window_width = window_width
