@@ -1,59 +1,86 @@
+from abc import ABC, abstractmethod
+from typing import Self, override
+
 import numpy as np
 import pygame
-from abc import ABC, abstractmethod
-from constants import ROTATION_TO_STATE, IX_TO_COLOR
+
+from constants import IX_TO_COLOR, STATE_TO_ROTATION
+from enums import Action
+
 
 class GridObject(ABC):
-    
-    def __init__(self, position, name, color=0, state=0):
+    # Class-level attributes
+    id = None
+    next_id = 1
+    id_map = {}
+
+    def __init__(self, position: tuple[int,int], color: int = 0, state: int = 0) -> None:
         self.start_position = np.array(position)
         self.position = np.array(position)
-        self.name = name
         self.start_color = color
         self.color = color
         self.start_state = state
         self.state = state
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        cls.id = GridObject.next_id
+        GridObject.id_map[cls] = cls.id
+        GridObject.next_id += 1
+
+    @abstractmethod
+    def render(self, canvas: pygame.Surface, pixelsquare: float):
+        pass
+
+    def get_identity(self) -> np.ndarray:
+        return np.array([self.__class__.id, self.color, self.state])
+
+    def interact(self, agent: Self) -> None:
+        pass
 
     def reset(self):
         self.position = self.start_position
         self.state = self.start_state
         self.color = self.start_color
 
-    def step(self, action):
+    def step(
+        self, action: Action,
+        front_object: Self | None = None,
+        walkable: bool = False,
+        ) -> None:
         pass
 
-    def walkable(self):
+    def walkable(self) -> bool:
         return False
-    
-    def interact(self, agent):
-        pass
-
-    @abstractmethod
-    def render(self, canvas, pixelsquare):
-        pass
-
 
 
 class Agent(GridObject):
 
-    def __init__(self, position, rotation):
-        super().__init__(position, "agent")
-        self.start_rotation = np.array(rotation)
-        self.rotation = np.array(rotation)
+    @override
+    def step(
+        self, action: Action,
+        front_object: GridObject | None = None,
+        walkable: bool = False,
+        ) -> None:
 
-    def rotate(self, dir):
-        self.rotation = np.flip(self.rotation) * dir
-        self.state = ROTATION_TO_STATE[tuple(self.rotation)]
+        if action == Action.FORWARD and walkable:
+            self.position = self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
 
-    def reset(self):
-        super().reset()
-        self.rotation = self.start_rotation
+        elif action == Action.TURN_RIGHT:
+            self.state = (self.state - 1) % 4
 
-    def render(self, canvas, pixelsquare):
-        # Constant Parameters
+        elif action == Action.TURN_LEFT:
+            self.state = (self.state + 1) % 4
+
+        elif action == Action.INTERACT and front_object:
+            front_object.interact(self)
+
+    @override
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
+        # Constant parameters
         c = np.array([0.5, 0.5])
         d = 0.35
-        r = self.rotation
+        r = STATE_TO_ROTATION[self.state]
 
         # Calculate points for triangle rotation
         p1 = (self.position + c - np.array([-d, d]) * r) * pixelsquare
@@ -64,71 +91,63 @@ class Agent(GridObject):
         pygame.draw.polygon(
             canvas,
             IX_TO_COLOR[self.color],
-            (p1, p2, p3),
+            (p1, pygame.Vector2(*p2), pygame.Vector2(*p3)),
             0 # filled triangle
         )
 
 
 class Wall(GridObject):
 
-    def __init__(self, position):
-        super().__init__(position, "wall")
-
-    def render(self, canvas, pixelsquare):
+    @override
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
         pygame.draw.rect(
             canvas,
-            (210, 210, 210),
+            IX_TO_COLOR[self.color],
             pygame.Rect(
-                pixelsquare * self.position,
+                pygame.Vector2(*(pixelsquare * self.position)),
                 (pixelsquare, pixelsquare),
             ),
         )
 
 
 class Target(GridObject):
-    
-    def __init__(self, position):
-        super().__init__(position, "target")
 
-    def walkable(self):
-        return True
-
-    def render(self, canvas, pixelsquare):
+    @override
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
         pygame.draw.rect(
             canvas,
-            (41, 191, 18),
+            IX_TO_COLOR[self.color],
             pygame.Rect(
-                pixelsquare * self.position,
+                pygame.Vector2(*(pixelsquare * self.position)),
                 (pixelsquare, pixelsquare),
             ),
         )
 
+    @override
+    def walkable(self) -> bool:
+        return True
+
 
 class Door(GridObject):
-    def __init__(self, position, state=1, color=0):
-        super().__init__(position, "door", state=state, color=color)
 
-    def walkable(self):
-        return True if self.state == 0 else False
-    
+    @override
     def interact(self, agent):
         if self.state == 2 and agent.color != self.color:
             return
-        
         elif self.state == 2 and agent.color == self.color:
             self.state = 0
             agent.color = agent.start_color
-        
         else:
             self.state = (self.state + 1) % 2
 
-    def render(self, canvas, pixelsquare):        
+    @override
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
         if self.state > 0:
             pygame.draw.rect(
                 canvas,
                 IX_TO_COLOR[self.color],
                 pygame.Rect(
-                    pixelsquare * self.position,
+                    pygame.Vector2(*(pixelsquare * self.position)),
                     (pixelsquare, pixelsquare),
                 ), 5
             )
@@ -136,54 +155,52 @@ class Door(GridObject):
             pygame.draw.circle(
                 canvas,
                 IX_TO_COLOR[self.color],
-                (self.position + np.array([0.75,0.5])) * pixelsquare,
+                pygame.Vector2(*((self.position + np.array([0.75,0.5])) * pixelsquare)),
                 0.1 * pixelsquare,
             )
-        
-        else: 
+
+        else:
             pygame.draw.rect(
                 canvas,
                 IX_TO_COLOR[self.color],
                 pygame.Rect(
-                    pixelsquare * self.position,
+                    pygame.Vector2(*(pixelsquare * self.position)),
                     (pixelsquare*0.2, pixelsquare),
                 ), 5
             )
 
+    @override
+    def walkable(self) -> bool:
+        return self.state == 0
+
+
 class Key(GridObject):
-    def __init__(self, position, state=0, color=0):
-        super().__init__(position, "key", state=state, color=color)
 
-    def walkable(self):
-        return True if self.state == 1 else False
-    
-    def interact(self, agent):
-        if self.state == 0:
-            agent.color = self.color
-            self.state = 1
+    @override
+    def interact(self, agent: Agent) -> None:
+        agent.color = self.color
+        self.position = np.array([-1,-1])
 
-    def render(self, canvas, pixelsquare):
-        if self.state==0:
-            pygame.draw.circle(
-                canvas,
-                IX_TO_COLOR[self.color],
-                (self.position + np.array([0.5,0.4])) * pixelsquare,
-                0.15 * pixelsquare,
-                5
-            )
-
-            pygame.draw.line(
-                canvas,
-                IX_TO_COLOR[self.color],
-                (self.position + np.array([0.5,0.55])) * pixelsquare,
-                (self.position + np.array([0.5,0.8])) * pixelsquare,
-                5
-            )
-
-            pygame.draw.line(
-                canvas,
-                IX_TO_COLOR[self.color],
-                (self.position + np.array([0.5,0.7])) * pixelsquare,
-                (self.position + np.array([0.4,0.7])) * pixelsquare,
-                5
-            )
+    @override
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
+        pygame.draw.circle(
+            canvas,
+            IX_TO_COLOR[self.color],
+            pygame.Vector2(*((self.position + np.array([0.5,0.4])) * pixelsquare)),
+            0.15 * pixelsquare,
+            5
+        )
+        pygame.draw.line(
+            canvas,
+            IX_TO_COLOR[self.color],
+            pygame.Vector2(*((self.position + np.array([0.5,0.55])) * pixelsquare)),
+            pygame.Vector2(*((self.position + np.array([0.5,0.8])) * pixelsquare)),
+            5
+        )
+        pygame.draw.line(
+            canvas,
+            IX_TO_COLOR[self.color],
+            pygame.Vector2(*((self.position + np.array([0.5,0.7])) * pixelsquare)),
+            pygame.Vector2(*((self.position + np.array([0.4,0.7])) * pixelsquare)),
+            5
+        )

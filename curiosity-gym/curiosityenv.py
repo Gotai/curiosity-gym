@@ -1,41 +1,59 @@
-from gridenv import GridEnv
-import objects as ob
-import numpy as np
-from agentpov import TwoFrontView
-from constants import TWO_ROOMS_MAP
-from agentpov import AgentPOV
 from typing import override
 
-class CuriousNavigation(GridEnv):
-    
-    def __init__(self, agentPOV: AgentPOV, render_mode=None, window_width:int=512):
-        super().__init__(
-            agentPOV, 
-            render_mode=render_mode, 
-            window_width=window_width,
-            width=10,
-            height=10,
-            max_steps=50,
-            )
-    
-    def _init_map(self) -> np.ndarray:
-        return self.load_map(TWO_ROOMS_MAP)
-    
-    def _init_objects(self) -> np.ndarray:
-        self.target = ob.Target((8,6))
-        return np.array([
-            self.target,
-            ob.Door((3,4), state=2, color=1),
-            ob.Key((3,1), color=1)
-        ])
-    
-    def _init_agent(self) -> ob.GridObject:
-        return ob.Agent((1,1), (1,0))
+import numpy as np
 
-    def _get_reward(self) -> int:
-        return 10/self.step_count if np.all(self.target.position == self.agent.position) else 0
-    
+import objects
+from agentpov import AgentPOV
+from constants import TWO_ROOMS_MAP
+from gridenv import GridEnv
+from utils import EnvironmentSettings, RenderSettings, EnvironmentObjects
+
+
+class SmallNavigationEnv(GridEnv):
+    """Placeholder"""
+
+    @override
+    def __init__(self, agentPOV: AgentPOV, render_mode=None, window_width:int=512) -> None:
+
+        env_settings = EnvironmentSettings(
+            max_steps = 50,
+            width = 10,
+            height = 10,
+            reward_range = (0,1),
+        )
+
+        render_settings = RenderSettings(
+            render_mode = render_mode,
+            window_width = window_width,
+            window_height = int(window_width * (env_settings.height / env_settings.width)),
+        )
+
+        other_objects = np.array([
+            objects.Door((3,4), state=2, color=3),
+            objects.Key((3,1), color=3),
+        ])
+
+        env_objects = EnvironmentObjects(
+            agent = objects.Agent((1,1), color=1),
+            target = objects.Target((8,6), color=2),
+            walls = self.load_walls(TWO_ROOMS_MAP),
+            other = other_objects,
+        )
+
+        super().__init__(
+            agentPOV,
+            env_settings=env_settings,
+            render_settings=render_settings,
+            env_objects=env_objects,
+        )
+
+    @override
+    def _get_reward(self) -> float:
+        return 16 / self.step_count * self.env_settings.reward_range[1] if self._task() else 0
+
+    @override
     def _get_terminated(self) -> bool:
-        if super()._get_terminated() or np.all(self.target.position == self.agent.position):
-             return True
-        return False
+        return super()._get_terminated() or self._task()
+
+    def _task(self) -> bool:
+        return bool(np.all(self.objects.target.position == self.objects.agent.position))
