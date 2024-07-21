@@ -7,7 +7,6 @@ import pygame
 
 import objects
 from agentpov import AgentPOV
-from constants import STATE_TO_ROTATION
 from enums import Action
 from utils import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
@@ -53,14 +52,12 @@ class GridEnv(gym.Env, ABC):
         return self.step_count >= self.env_settings.max_steps
 
     def step(self, action: int | Action) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
-        action = Action(action)
-        rotation = STATE_TO_ROTATION[self.objects.agent.state]
-        front_position = self.objects.agent.position + rotation * np.array([1,-1])
-        front_object = self._find_object(front_position)
-        walkable = self._check_walkable(front_position)
-
         for ob in self.objects.get_non_wall():
-            ob.step(action, front_object, walkable)
+            ob.step(
+                Action(action),
+                self._find_object(self.objects.agent.get_front()),
+                self._check_walkable(self.objects.agent.get_front())
+                )
 
         if self.render_settings.render_mode == "human":
             self._render_frame()
@@ -84,6 +81,9 @@ class GridEnv(gym.Env, ABC):
         if self.render_settings.window is not None:
             pygame.display.quit()
             pygame.quit()
+    
+    def get_object_ids(self) -> dict[objects.GridObject, int]:
+        return objects.GridObject.id_map
 
     def get_state(self) -> np.ndarray:
         state = np.zeros([self.env_settings.width * self.env_settings.height, 3])
@@ -95,6 +95,18 @@ class GridEnv(gym.Env, ABC):
     def load_walls(self, positions: np.ndarray) -> np.ndarray:
         walls = [objects.Wall(position) for position in positions]
         return np.array(walls)
+
+    def simulate(self, action: int | Action) -> np.ndarray:
+        state = np.zeros([self.env_settings.width * self.env_settings.height, 3])
+        for ob in self.objects.get_all():
+            ob_simulated = ob.simulate(
+                Action(action),
+                self._find_object(self.objects.agent.get_front()),
+                self._check_walkable(self.objects.agent.get_front())
+                )
+            x,y = ob_simulated.position
+            state[x + y * self.env_settings.width] = ob_simulated.get_identity()
+        return state
 
     def _check_walkable(self, position: np.ndarray) -> bool:
         inbounds_horizontal = 0 < position[0] < self.env_settings.width

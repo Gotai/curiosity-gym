@@ -1,3 +1,4 @@
+import copy
 from abc import ABC, abstractmethod
 from typing import Self, override
 
@@ -50,6 +51,15 @@ class GridObject(ABC):
         ) -> None:
         pass
 
+    def simulate(
+        self, action: Action,
+        front_object: Self | None = None,
+        walkable: bool = False,
+        ) -> Self:
+        simulated = copy.deepcopy(self)
+        simulated.step(action, front_object, walkable)
+        return simulated
+
     def walkable(self) -> bool:
         return False
 
@@ -94,6 +104,9 @@ class Agent(GridObject):
             (p1, pygame.Vector2(*p2), pygame.Vector2(*p3)),
             0 # filled triangle
         )
+
+    def get_front(self) -> np.ndarray:
+        return self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
 
 
 class Wall(GridObject):
