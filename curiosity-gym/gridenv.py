@@ -81,7 +81,7 @@ class GridEnv(gym.Env, ABC):
         if self.render_settings.window is not None:
             pygame.display.quit()
             pygame.quit()
-    
+
     def get_object_ids(self) -> dict[objects.GridObject, int]:
         return objects.GridObject.id_map
 

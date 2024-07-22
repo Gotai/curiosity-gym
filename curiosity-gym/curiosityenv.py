@@ -31,6 +31,8 @@ class SmallNavigationEnv(GridEnv):
         other_objects = np.array([
             objects.Door((3,4), state=2, color=3),
             objects.Key((3,1), color=3),
+            objects.RandomBlock((1,3)),
+            objects.Enemy((6,7), state=1),
         ])
 
         env_objects = EnvironmentObjects(

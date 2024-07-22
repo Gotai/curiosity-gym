@@ -22,6 +22,10 @@ IX_TO_COLOR = {
     3: (8,189,189), # turquoise
     4: (250,199,72), # yellow
     5: (184,19,101), # purple-red
+    6: (0,139,248), # blue
+    7: (39,8,160), # dark blue
+    8: (123,40,125), # purple
+    9: (247,44,37), # red
 }
 
 TWO_ROOMS_MAP = np.array([

@@ -1,4 +1,5 @@
 import copy
+import random
 from abc import ABC, abstractmethod
 from typing import Self, override
 
@@ -216,4 +217,91 @@ class Key(GridObject):
             pygame.Vector2(*((self.position + np.array([0.5,0.7])) * pixelsquare)),
             pygame.Vector2(*((self.position + np.array([0.4,0.7])) * pixelsquare)),
             5
+        )
+
+
+class RandomBlock(GridObject):
+
+    @override
+    def step(
+        self, action: Action,
+        front_object: Self | None = None,
+        walkable: bool = False,
+        ) -> None:
+        self.color = random.randint(3,len(IX_TO_COLOR)-1)
+
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
+        pygame.draw.rect(
+            canvas,
+            IX_TO_COLOR[self.color],
+            pygame.Rect(
+                pygame.Vector2(*((self.position + np.array([0.15,0.15])) * pixelsquare)),
+                (pixelsquare*0.7, pixelsquare*0.7),
+            ),
+        )
+        font = pygame.font.SysFont("freesansbold", 60)
+        img = font.render("?", True, (255, 255, 255))
+        canvas.blit(img, pygame.Vector2(*((self.position + np.array([0.3,0.25])) * pixelsquare)))
+
+
+class Enemy(GridObject):
+
+    @override
+    def __init__(self, 
+                 position: tuple[int,int],
+                 color: int = 9,
+                 state: int = 0,
+                 reach: int = 2
+                 ) -> None:
+        super().__init__(position, color, state)
+        self.reach = reach
+        self.direction = 1
+
+    @override
+    def step(
+        self, action: Action,
+        front_object: Self | None = None,
+        walkable: bool = False,
+        ) -> None:
+        self.position = self.position + self.direction * STATE_TO_ROTATION[self.state] * np.array([1,-1])
+        if self.position[self.state%2] == self.start_position[self.state%2] + self.reach or \
+        self.position[self.state%2] == self.start_position[self.state%2] - self.reach or \
+        self.position[self.state%2] == self.start_position[self.state%2]:
+            self.direction *= -1
+
+    @override
+    def walkable(self) -> bool:
+        return True
+
+    @override
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
+        pygame.draw.polygon(
+            canvas,
+            IX_TO_COLOR[self.color],
+            (
+                pygame.Vector2(*((self.position + np.array([0.25,0.2])) * pixelsquare)),
+                pygame.Vector2(*((self.position + np.array([0.75,0.2])) * pixelsquare)),
+                pygame.Vector2(*((self.position + np.array([0.85,0.55])) * pixelsquare)),
+                pygame.Vector2(*((self.position + np.array([0.5,0.85])) * pixelsquare)),
+                pygame.Vector2(*((self.position + np.array([0.15,0.55])) * pixelsquare)),
+            )
+        )
+        pygame.draw.circle(
+            canvas,
+            (255,255,255),
+            pygame.Vector2(*((self.position + np.array([0.35,0.37])) * pixelsquare)),
+            5
+        )
+        pygame.draw.circle(
+            canvas,
+            (255,255,255),
+            pygame.Vector2(*((self.position + np.array([0.65,0.37])) * pixelsquare)),
+            5
+        )
+        pygame.draw.line(
+            canvas,
+            (255,255,255),
+            pygame.Vector2(*((self.position + np.array([0.4,0.63])) * pixelsquare)),
+            pygame.Vector2(*((self.position + np.array([0.6,0.63])) * pixelsquare)),
+            3
         )
