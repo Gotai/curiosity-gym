@@ -7,3 +7,5 @@ test2.ipynb
 testing_grid.ipynb
 grid.py
 old/
+build/
+curiosity_gym.egg-info

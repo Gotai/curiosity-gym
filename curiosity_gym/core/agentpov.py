@@ -4,7 +4,7 @@ from typing import override
 import numpy as np
 from gymnasium import spaces
 
-import objects
+from core import objects
 
 
 class AgentPOV(ABC):

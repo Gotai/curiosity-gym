@@ -5,10 +5,10 @@ import gymnasium as gym
 import numpy as np
 import pygame
 
-import objects
-from agentpov import AgentPOV
-from enums import Action
-from utils import EnvironmentSettings, RenderSettings, EnvironmentObjects
+from core import objects
+from core.agentpov import AgentPOV
+from utils.enums import Action
+from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
 class GridEnv(gym.Env, ABC):
@@ -59,10 +59,10 @@ class GridEnv(gym.Env, ABC):
                 self._check_walkable(self.objects.agent.get_front())
                 )
 
+        self.step_count += 1
         if self.render_settings.render_mode == "human":
             self._render_frame()
 
-        self.step_count += 1
         return self._get_obs(), self._get_reward(), self._get_terminated(), False, self._get_info()
 
     def reset(self, **kwargs) -> tuple[np.ndarray, dict]:
@@ -89,6 +89,9 @@ class GridEnv(gym.Env, ABC):
         state = np.zeros([self.env_settings.width * self.env_settings.height, 3])
         for ob in self.objects.get_all():
             x,y = ob.position
+            assert x + y * self.env_settings.width < len(state), \
+            f"""Position [{x},{y}] of object with type {self.get_object_ids()[ob.id]}
+            is invalid for grid with size ({self.env_settings.width}, {self.env_settings.height})"""
             state[x + y * self.env_settings.width] = ob.get_identity()
         return state
 
@@ -153,7 +156,7 @@ class GridEnv(gym.Env, ABC):
                 (window_size[0], tilesize * x),
                 width=3,
             )
-        for y in range(self.env_settings.width + 1):  
+        for y in range(self.env_settings.width + 1):
             pygame.draw.line(
                 canvas,
                 line_color,
@@ -169,6 +172,7 @@ class GridEnv(gym.Env, ABC):
             self.render_settings.window.blit(canvas, canvas.get_rect())
             pygame.event.pump()
             pygame.display.update()
+            pygame.display.set_caption(f"Curiosity Gym (Current Steps: {self.step_count})")
             self.render_settings.clock.tick(self.render_settings.render_fps)
 
         # Return for rgb_array

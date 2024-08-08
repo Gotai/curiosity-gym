@@ -2,11 +2,11 @@ from typing import override
 
 import numpy as np
 
-import objects
-from agentpov import AgentPOV
-from constants import TWO_ROOMS_MAP
-from gridenv import GridEnv
-from utils import EnvironmentSettings, RenderSettings, EnvironmentObjects
+from core import objects
+from core.agentpov import AgentPOV
+from core.gridenv import GridEnv
+from utils.constants import TWO_ROOMS_MAP
+from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
 class SmallNavigationEnv(GridEnv):

@@ -6,8 +6,8 @@ from typing import Self, override
 import numpy as np
 import pygame
 
-from constants import IX_TO_COLOR, STATE_TO_ROTATION
-from enums import Action
+from utils.constants import IX_TO_COLOR, STATE_TO_ROTATION
+from utils.enums import Action
 
 
 class GridObject(ABC):
@@ -27,7 +27,7 @@ class GridObject(ABC):
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         cls.id = GridObject.next_id
-        GridObject.id_map[cls] = cls.id
+        GridObject.id_map[GridObject.next_id] = cls
         GridObject.next_id += 1
 
     @abstractmethod
@@ -235,13 +235,14 @@ class RandomBlock(GridObject):
             canvas,
             IX_TO_COLOR[self.color],
             pygame.Rect(
-                pygame.Vector2(*((self.position + np.array([0.15,0.15])) * pixelsquare)),
+                pygame.Vector2(*((self.position) * pixelsquare) +
+                np.array([0.15,0.15]) * pixelsquare),
                 (pixelsquare*0.7, pixelsquare*0.7),
             ),
         )
-        font = pygame.font.SysFont("freesansbold", 60)
+        font = pygame.font.SysFont("freesansbold", int(pixelsquare))
         img = font.render("?", True, (255, 255, 255))
-        canvas.blit(img, pygame.Vector2(*((self.position + np.array([0.3,0.25])) * pixelsquare)))
+        canvas.blit(img, pygame.Vector2(*((self.position + np.array([0.275,0.2])) * pixelsquare)))
 
 
 class Enemy(GridObject):
@@ -255,7 +256,6 @@ class Enemy(GridObject):
                  ) -> None:
         super().__init__(position, color, state)
         self.reach = reach
-        self.direction = 1
 
     @override
     def step(
@@ -263,11 +263,11 @@ class Enemy(GridObject):
         front_object: Self | None = None,
         walkable: bool = False,
         ) -> None:
-        self.position = self.position + self.direction * STATE_TO_ROTATION[self.state] * np.array([1,-1])
+        self.position = self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
         if self.position[self.state%2] == self.start_position[self.state%2] + self.reach or \
         self.position[self.state%2] == self.start_position[self.state%2] - self.reach or \
         self.position[self.state%2] == self.start_position[self.state%2]:
-            self.direction *= -1
+            self.state = (self.state + 2) % 4
 
     @override
     def walkable(self) -> bool:

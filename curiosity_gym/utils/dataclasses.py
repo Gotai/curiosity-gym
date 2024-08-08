@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import pygame
 
-import objects
+from core import objects
 
 
 @dataclass
