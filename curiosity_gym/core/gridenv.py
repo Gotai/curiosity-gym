@@ -44,26 +44,34 @@ class GridEnv(gym.Env, ABC):
             self.render_settings.clock = pygame.time.Clock()
 
     @abstractmethod
-    def _get_reward(self) -> int:
+    def _task(self) -> bool:
         pass
 
-    @abstractmethod
     def _get_terminated(self) -> bool:
-        return self.step_count >= self.env_settings.max_steps
+        return (self.step_count >= self.env_settings.max_steps
+        or self._check_harmful(self.objects.agent.position)
+        or self._task())
 
     def step(self, action: int | Action) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+        reward = 0
         for ob in self.objects.get_non_wall():
-            ob.step(
+            reward += ob.step(
                 Action(action),
                 self._find_object(self.objects.agent.get_front()),
-                self._check_walkable(self.objects.agent.get_front())
+                self._check_walkable(self.objects.agent.get_front()),
+                self.step_count,
                 )
 
         self.step_count += 1
+        reward += (self.env_settings.min_steps / self.step_count *
+                   self.env_settings.reward_range[1]) if self._task() else 0
+
         if self.render_settings.render_mode == "human":
+            pygame.display.set_caption(f"Curiosity Gym [Current Steps: {self.step_count}, " +
+                                        f"Step reward: {reward}]")
             self._render_frame()
 
-        return self._get_obs(), self._get_reward(), self._get_terminated(), False, self._get_info()
+        return self._get_obs(), reward, self._get_terminated(), False, self._get_info()
 
     def reset(self, **kwargs) -> tuple[np.ndarray, dict]:
         super().reset(**kwargs)
@@ -123,6 +131,12 @@ class GridEnv(gym.Env, ABC):
                 return False
         return True
 
+    def _check_harmful(self, position: np.ndarray) -> bool:
+        for ob in self.objects.other:
+            if np.all(ob.position == position) and ob.isHarmful():
+                return True
+        return False
+
     def _find_object(self, position: np.ndarray) -> objects.GridObject | None:
         for ob in self.objects.get_non_wall():
             if np.all(ob.position == position):
@@ -172,7 +186,6 @@ class GridEnv(gym.Env, ABC):
             self.render_settings.window.blit(canvas, canvas.get_rect())
             pygame.event.pump()
             pygame.display.update()
-            pygame.display.set_caption(f"Curiosity Gym (Current Steps: {self.step_count})")
             self.render_settings.clock.tick(self.render_settings.render_fps)
 
         # Return for rgb_array

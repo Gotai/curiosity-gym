@@ -8,6 +8,7 @@ from core import objects
 
 @dataclass
 class EnvironmentSettings:
+    min_steps: int
     max_steps: int = 50
     width: int = 10
     height: int = 10

@@ -5,21 +5,21 @@ import numpy as np
 from core import objects
 from core.agentpov import AgentPOV
 from core.gridenv import GridEnv
-from utils.constants import SPARSE_MAP_LARGE
+from utils.constants import DISTRACTIVE_MAP
 from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
-class SparseEnv(GridEnv):
+class DistractiveEnv(GridEnv):
     """Placeholder"""
 
     @override
     def __init__(self, agentPOV: AgentPOV, render_mode=None, window_width:int=512) -> None:
 
         env_settings = EnvironmentSettings(
-            min_steps = 66,
-            max_steps = 100,
-            width = 15,
-            height = 11,
+            min_steps = 40,
+            max_steps = 50,
+            width = 23,
+            height = 7,
             reward_range = (0,1),
         )
 
@@ -30,32 +30,17 @@ class SparseEnv(GridEnv):
         )
 
         other_objects = np.array([
-            # Room 1:
-            objects.Key((5,2), color=3),
-            objects.Door((9,2), state=2, color=3),
-
-            # Room 2:
-            objects.Key((13,1), color=4),
-            objects.Door((12,4), state=2, color=4),
-
-            # Room 3:
-            objects.Key((11,8), color=5),
-            objects.Door((8,6), state=2, color=5),        
-            objects.Enemy((10,9), state=1, reach=4),
-
-            # Room 4:
-            objects.Key((5,6), color=6),
-            objects.Door((4,8), state=2, color=6),
-            objects.RandomBlock((6,6)),
-
-            # Room 5:
-            objects.Enemy((1,5), state=0, reach=2),
+            objects.SmallReward((8,5), reward = 0.1, color=8),
+            objects.SmallReward((6,1), reward = 0.1, color=8),
+            objects.SmallReward((4,5), reward = 0.1, color=8),
+            objects.SmallReward((2,1), reward = 0.1, color=8),
+            objects.SmallReward((1,5), reward = 0.1, color=8),
         ])
 
         env_objects = EnvironmentObjects(
-            agent = objects.Agent((1,1), color=1),
-            target = objects.Target((7,4), color=2),
-            walls = self.load_walls(SPARSE_MAP_LARGE),
+            agent = objects.Agent((11,1), color=1, state=3),
+            target = objects.Target((21,5), color=2),
+            walls = self.load_walls(DISTRACTIVE_MAP),
             other = other_objects,
         )
 

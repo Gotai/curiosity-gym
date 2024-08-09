@@ -46,11 +46,14 @@ class GridObject(ABC):
         self.color = self.start_color
 
     def step(
-        self, action: Action,
+        self,
+        action: Action,
         front_object: Self | None = None,
         walkable: bool = False,
-        ) -> None:
-        pass
+        step_count: int = 0,
+        ) -> float:
+        del action, front_object, walkable, step_count
+        return 0
 
     def simulate(
         self, action: Action,
@@ -64,15 +67,20 @@ class GridObject(ABC):
     def walkable(self) -> bool:
         return False
 
+    def isHarmful(self) -> bool:
+        return False
+
 
 class Agent(GridObject):
 
     @override
     def step(
-        self, action: Action,
-        front_object: GridObject | None = None,
+        self,
+        action: Action,
+        front_object: Self | None = None,
         walkable: bool = False,
-        ) -> None:
+        step_count: int = 0,
+        ) -> float:
 
         if action == Action.FORWARD and walkable:
             self.position = self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
@@ -85,6 +93,8 @@ class Agent(GridObject):
 
         elif action == Action.INTERACT and front_object:
             front_object.interact(self)
+
+        return 0
 
     @override
     def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
@@ -145,10 +155,10 @@ class Target(GridObject):
 class Door(GridObject):
 
     @override
-    def interact(self, agent):
+    def interact(self, agent: Agent):
         if self.state == 2 and agent.color != self.color:
             return
-        elif self.state == 2 and agent.color == self.color:
+        if self.state == 2 and agent.color == self.color:
             self.state = 0
             agent.color = agent.start_color
         else:
@@ -224,11 +234,14 @@ class RandomBlock(GridObject):
 
     @override
     def step(
-        self, action: Action,
+        self,
+        action: Action,
         front_object: Self | None = None,
         walkable: bool = False,
-        ) -> None:
+        step_count: int = 0,
+        ) -> float:
         self.color = random.randint(3,len(IX_TO_COLOR)-1)
+        return 0
 
     def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
         pygame.draw.rect(
@@ -248,7 +261,7 @@ class RandomBlock(GridObject):
 class Enemy(GridObject):
 
     @override
-    def __init__(self, 
+    def __init__(self,
                  position: tuple[int,int],
                  color: int = 9,
                  state: int = 0,
@@ -258,16 +271,23 @@ class Enemy(GridObject):
         self.reach = reach
 
     @override
+    def isHarmful(self) -> bool:
+        return True
+
+    @override
     def step(
-        self, action: Action,
+        self,
+        action: Action,
         front_object: Self | None = None,
         walkable: bool = False,
-        ) -> None:
+        step_count: int = 0,
+        ) -> float:
         self.position = self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
         if self.position[self.state%2] == self.start_position[self.state%2] + self.reach or \
         self.position[self.state%2] == self.start_position[self.state%2] - self.reach or \
         self.position[self.state%2] == self.start_position[self.state%2]:
             self.state = (self.state + 2) % 4
+        return 0
 
     @override
     def walkable(self) -> bool:
@@ -305,3 +325,48 @@ class Enemy(GridObject):
             pygame.Vector2(*((self.position + np.array([0.6,0.63])) * pixelsquare)),
             3
         )
+
+
+class SmallReward(GridObject):
+
+    @override
+    def __init__(self,
+                 position: tuple[int,int],
+                 reward: float,
+                 color: int = 9,
+                 state: int = 0,
+                 ) -> None:
+        super().__init__(position, color, state)
+        self.reward = reward
+
+    @override
+    def walkable(self) -> bool:
+        return True
+
+    @override
+    def step(
+        self,
+        action: Action,
+        front_object: Self | None = None,
+        walkable: bool = False,
+        step_count: int = 0,
+        ) -> float:
+        if front_object == self:
+            self.position = np.array([-1,-1])
+            return self.reward
+        return 0
+
+    @override
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
+        pygame.draw.polygon(
+        canvas,
+        IX_TO_COLOR[self.color],
+        (
+            pygame.Vector2(*((self.position + np.array([0.5, 0.15])) * pixelsquare)),
+            pygame.Vector2(*((self.position + np.array([0.65, 0.35])) * pixelsquare)),
+            pygame.Vector2(*((self.position + np.array([0.65, 0.65])) * pixelsquare)),
+            pygame.Vector2(*((self.position + np.array([0.5, 0.85])) * pixelsquare)),
+            pygame.Vector2(*((self.position + np.array([0.35, 0.65])) * pixelsquare)),
+            pygame.Vector2(*((self.position + np.array([0.35, 0.35])) * pixelsquare)),
+        )
+    )

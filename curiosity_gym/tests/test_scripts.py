@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from core.gridenv import GridEnv
+#from tests.test_cases import CASES
 
 
 @dataclass
@@ -12,7 +13,7 @@ class Testcase:
     actions: list[int]
     position: tuple[int,int]
     state: int
-    reward: int
+    reward: float
     terminated: bool
 
     def test(self) -> bool:
@@ -47,3 +48,13 @@ class Testcase:
         )
 
         return True
+
+
+@dataclass
+class Testsuite:
+    cases: list[Testcase]
+
+    def run_all(self):
+        for case in self.cases:
+            case.test()
+        print("All test cases passed.")
