@@ -50,9 +50,8 @@ class GridObject(ABC):
         action: Action,
         front_object: Self | None = None,
         walkable: bool = False,
-        step_count: int = 0,
         ) -> float:
-        del action, front_object, walkable, step_count
+        del action, front_object, walkable
         return 0
 
     def simulate(
@@ -79,7 +78,6 @@ class Agent(GridObject):
         action: Action,
         front_object: Self | None = None,
         walkable: bool = False,
-        step_count: int = 0,
         ) -> float:
 
         if action == Action.FORWARD and walkable:
@@ -238,7 +236,6 @@ class RandomBlock(GridObject):
         action: Action,
         front_object: Self | None = None,
         walkable: bool = False,
-        step_count: int = 0,
         ) -> float:
         self.color = random.randint(3,len(IX_TO_COLOR)-1)
         return 0
@@ -280,7 +277,6 @@ class Enemy(GridObject):
         action: Action,
         front_object: Self | None = None,
         walkable: bool = False,
-        step_count: int = 0,
         ) -> float:
         self.position = self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
         if self.position[self.state%2] == self.start_position[self.state%2] + self.reach or \
@@ -349,7 +345,6 @@ class SmallReward(GridObject):
         action: Action,
         front_object: Self | None = None,
         walkable: bool = False,
-        step_count: int = 0,
         ) -> float:
         if front_object == self:
             self.position = np.array([-1,-1])
@@ -370,3 +365,41 @@ class SmallReward(GridObject):
             pygame.Vector2(*((self.position + np.array([0.35, 0.35])) * pixelsquare)),
         )
     )
+
+
+class Ball(GridObject):
+
+    @override
+    def __init__(self,
+                 position: tuple[int,int],
+                 zone_low: tuple[int,int],
+                 zone_high: tuple[int,int],
+                 color: int = 9,
+                 ) -> None:
+        super().__init__(position, color, 0)
+        self.zone_low = zone_low
+        self.zone_high = zone_high
+
+    @override
+    def interact(self, agent: Agent) -> None:
+        pos_new = self.position + self.position - agent.position
+        if (self.zone_low[0] <= pos_new[0] <= self.zone_high[0]) and (
+            self.zone_low[1] <= pos_new[1] <= self.zone_high[1]):
+            self.position = pos_new
+
+    @override
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
+        pygame.draw.circle(
+            canvas,
+            IX_TO_COLOR[self.color],
+            pygame.Vector2(*((self.position + np.array([0.5,0.5])) * pixelsquare)),
+            0.35 * pixelsquare,
+            0
+        )
+        pygame.draw.circle(
+            canvas,
+            IX_TO_COLOR[0],
+            pygame.Vector2(*((self.position + np.array([0.5,0.5])) * pixelsquare)),
+            0.36 * pixelsquare,
+            3
+        )

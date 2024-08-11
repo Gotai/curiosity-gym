@@ -5,7 +5,7 @@ import numpy as np
 from core import objects
 from core.agentpov import AgentPOV
 from core.gridenv import GridEnv
-from utils.constants import DISTRACTIVE_MAP
+from utils.constants import MAP_DISTRACTIVE
 from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
@@ -13,7 +13,12 @@ class DistractiveEnv(GridEnv):
     """Placeholder"""
 
     @override
-    def __init__(self, agentPOV: AgentPOV, render_mode=None, window_width:int=512) -> None:
+    def __init__(
+        self,
+        agentPOV: AgentPOV,
+        render_mode: str | None = None,
+        window_width: int = 1200
+        ) -> None:
 
         env_settings = EnvironmentSettings(
             min_steps = 40,
@@ -40,7 +45,7 @@ class DistractiveEnv(GridEnv):
         env_objects = EnvironmentObjects(
             agent = objects.Agent((11,1), color=1, state=3),
             target = objects.Target((21,5), color=2),
-            walls = self.load_walls(DISTRACTIVE_MAP),
+            walls = self.load_walls(MAP_DISTRACTIVE),
             other = other_objects,
         )
 

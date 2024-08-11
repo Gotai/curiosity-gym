@@ -5,7 +5,7 @@ import numpy as np
 from core import objects
 from core.agentpov import AgentPOV
 from core.gridenv import GridEnv
-from utils.constants import SPARSE_MAP_LARGE
+from utils.constants import MAP_SPARSE
 from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
@@ -13,7 +13,12 @@ class SparseEnv(GridEnv):
     """Placeholder"""
 
     @override
-    def __init__(self, agentPOV: AgentPOV, render_mode=None, window_width:int=512) -> None:
+    def __init__(
+        self,
+        agentPOV: AgentPOV,
+        render_mode: str | None = None,
+        window_width: int = 800
+        ) -> None:
 
         env_settings = EnvironmentSettings(
             min_steps = 66,
@@ -55,7 +60,7 @@ class SparseEnv(GridEnv):
         env_objects = EnvironmentObjects(
             agent = objects.Agent((1,1), color=1),
             target = objects.Target((7,4), color=2),
-            walls = self.load_walls(SPARSE_MAP_LARGE),
+            walls = self.load_walls(MAP_SPARSE),
             other = other_objects,
         )
 

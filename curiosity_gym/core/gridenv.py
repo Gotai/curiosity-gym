@@ -37,11 +37,7 @@ class GridEnv(gym.Env, ABC):
 
         # Initialise Render Objects
         if self.render_settings.render_mode == "human":
-            pygame.init()
-            pygame.display.init()
-            window_size = (self.render_settings.window_width, self.render_settings.window_height)
-            self.render_settings.window = pygame.display.set_mode(window_size)
-            self.render_settings.clock = pygame.time.Clock()
+            self.init_render()
 
     @abstractmethod
     def _task(self) -> bool:
@@ -59,7 +55,6 @@ class GridEnv(gym.Env, ABC):
                 Action(action),
                 self._find_object(self.objects.agent.get_front()),
                 self._check_walkable(self.objects.agent.get_front()),
-                self.step_count,
                 )
 
         self.step_count += 1
@@ -102,6 +97,13 @@ class GridEnv(gym.Env, ABC):
             is invalid for grid with size ({self.env_settings.width}, {self.env_settings.height})"""
             state[x + y * self.env_settings.width] = ob.get_identity()
         return state
+
+    def init_render(self) -> None:
+        pygame.init()
+        pygame.display.init()
+        window_size = (self.render_settings.window_width, self.render_settings.window_height)
+        self.render_settings.window = pygame.display.set_mode(window_size)
+        self.render_settings.clock = pygame.time.Clock()
 
     def load_walls(self, positions: np.ndarray) -> np.ndarray:
         walls = [objects.Wall(position) for position in positions]

@@ -36,4 +36,4 @@ class EnvironmentObjects:
         return np.concatenate((self.get_non_wall(), self.walls))
 
     def get_non_wall(self) -> np.ndarray:
-        return np.concatenate((self.other, np.array([self.target]), np.array([self.agent])))
+        return np.concatenate((np.array([self.target]), self.other, np.array([self.agent])))

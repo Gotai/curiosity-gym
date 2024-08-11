@@ -1,11 +1,14 @@
 from core.agentpov import FullView
 from envs.sparseenv import SparseEnv
 from envs.distractiveenv import DistractiveEnv
+from envs.multitaskenv import MultitaskEnv
 from tests.test_scripts import Testcase, Testsuite
 
 
 env_sparse = SparseEnv(FullView())
 env_distractive = DistractiveEnv(FullView())
+env_multitask_1 = MultitaskEnv(FullView(), task=1)
+env_multitask_2 = MultitaskEnv(FullView(), task=2)
 
 testsuite = Testsuite([
     # Case 1: Maximum step count.
@@ -98,7 +101,7 @@ testsuite = Testsuite([
         actions = [0,0,0,0,1,3,0,2,0,0,0,3,0,0,0,0,0,2,3,2,0,2,0,3,0,0,0,1,0,0,3,3,3,3,3],
     ),
 
-    # Case 7: Target Reward.
+    # Case 7: Target sparse reward.
     #
     # Objective: Test the successful completion of the task.
     # Actions: Optimal policy for sparse navigation environment.
@@ -114,7 +117,7 @@ testsuite = Testsuite([
                    2,0,0,3,0,0,2,0,1,0,0,1,3,1,1,0,1,3,0,0,1,0,0,0,0,1,0,0,0,0],
     ),
 
-    # Case 8: Small Reward.
+    # Case 8: Small reward.
     #
     # Objective: Test the functionality of the small reward object.
     # Actions: Move to small reward.
@@ -129,11 +132,11 @@ testsuite = Testsuite([
         actions = [1,0,0,2,0,0,0,0,1,0],
     ),
 
-    # Case 9: Sum of small rewards.
+    # Case 9: Target distractive reward.
     #
-    # Objective: Test distractive rewards.
-    # Actions: Collect all small rewards.
-    # Expected: Total sum of small rewards < maximum reward.
+    # Objective: Test completion of distractive reward environment.
+    # Actions: Move to target location (right side).
+    # Expected: Maximum reward + episode termination.
     Testcase(
         identifier = 9,
         environment= env_distractive,
@@ -142,5 +145,80 @@ testsuite = Testsuite([
         reward = env_distractive.env_settings.reward_range[1],
         terminated = True,
         actions = [2,0,0,1,0,0,0,0,2,0,0,2,0,0,0,0,1,0,0,1,0,0,0,0,2,0,0,2,0,0,0,0,1,0,0,1,0,0,0,0],
-    )
+    ),
+
+    # Case 10: Pushing ball.
+    #
+    # Objective: Test if ball is pushed one cell by interaction.
+    # Actions: Move to ball, interact, attempt to move forward 2 cells.
+    # Expected: Movement to previous ball position possible.
+    Testcase(
+        identifier = 10,
+        environment= env_multitask_1,
+        position = (12,3),
+        state = 0,
+        reward = 0,
+        terminated = False,
+        actions = [1,0,0,3,0,0],
+    ),
+
+    # Case 11: Task 1 of multitask.
+    #
+    # Objective: Test completion of task 1 in the multitask environment.
+    # Actions: Get key, open the door, move to target location (left side).
+    # Expected: Maximum reward + episode termination.
+    Testcase(
+        identifier = 11,
+        environment= env_multitask_1,
+        position = (3,3),
+        state = 2,
+        reward = env_distractive.env_settings.reward_range[1],
+        terminated = True,
+        actions = [0,0,2,0,3,0,2,0,0,1,3,0,0,0,0],
+    ),
+
+    # Case 12: Task 1 of multitask: No reward for task 2.
+    #
+    # Objective: Test completion of task 2 while task 1 is active.
+    # Actions: Push ball to target location (right side).
+    # Expected: No reward + no episode termination.
+    Testcase(
+        identifier = 12,
+        environment= env_multitask_1,
+        position = (13,3),
+        state = 0,
+        reward = 0,
+        terminated = False,
+        actions = [1,0,0,3,0,3,0,3],
+    ),
+
+    # Case 13: Task 2 of multitask.
+    #
+    # Objective: Test completion of task 2 in the multitask environment.
+    # Actions: Push ball to target location (right side).
+    # Expected: Maximum reward + episode termination.
+    Testcase(
+        identifier = 13,
+        environment= env_multitask_2,
+        position = (13,3),
+        state = 0,
+        reward = env_distractive.env_settings.reward_range[1],
+        terminated = True,
+        actions = [1,0,0,3,0,3,0,3],
+    ),
+
+    # Case 14: Task 2 of multitask: No reward for task 1.
+    #
+    # Objective: Test completion of task 1 while task 2 is active.
+    # Actions: Get key, open the door, move to target location (left side).
+    # Expected: Maximum reward + episode termination.
+    Testcase(
+        identifier = 14,
+        environment= env_multitask_2,
+        position = (3,3),
+        state = 2,
+        reward = 0,
+        terminated = False,
+        actions = [0,0,2,0,3,0,2,0,0,1,3,0,0,0,0],
+    ),
 ])

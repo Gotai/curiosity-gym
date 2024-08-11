@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 
 import numpy as np
@@ -58,3 +59,14 @@ class Testsuite:
         for case in self.cases:
             case.test()
         print("All test cases passed.")
+
+    def show(self, identifier):
+        for case in self.cases:
+            if case.identifier == identifier:
+                case.environment.render_settings.render_mode = "human"
+                case.environment.init_render()
+                case.test()
+                time.sleep(2)
+                case.environment.render_settings.render_mode = None
+                case.environment.close()
+                print(f"Test with id {identifier} passed.")
