@@ -43,11 +43,6 @@ class GridEnv(gym.Env, ABC):
     def _task(self) -> bool:
         pass
 
-    def _get_terminated(self) -> bool:
-        return (self.step_count >= self.env_settings.max_steps
-        or self._check_harmful(self.objects.agent.position)
-        or self._task())
-
     def step(self, action: int | Action) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
         reward = 0
         for ob in self.objects.get_non_wall():
@@ -150,6 +145,11 @@ class GridEnv(gym.Env, ABC):
 
     def _get_obs(self) -> np.ndarray:
         return self.agent_pov.transform_obs(self.get_state(), self.objects.agent)
+
+    def _get_terminated(self) -> bool:
+        return (self.step_count >= self.env_settings.max_steps
+        or self._check_harmful(self.objects.agent.position)
+        or self._task())
 
     def _render_frame(self) -> np.ndarray | None:
         # Define Canvas for new Frame
