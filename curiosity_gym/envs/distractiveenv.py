@@ -4,18 +4,18 @@ import numpy as np
 
 from core import objects
 from core.agentpov import AgentPOV
-from core.gridenv import GridEnv
+from core.gridengine import GridEngine
 from utils.constants import MAP_DISTRACTIVE
 from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
-class DistractiveEnv(GridEnv):
+class DistractiveEnv(GridEngine):
     """Placeholder"""
 
     @override
     def __init__(
         self,
-        agentPOV: AgentPOV,
+        agentPOV: AgentPOV | str = "global",
         render_mode: str | None = None,
         window_width: int = 1200
         ) -> None:
@@ -50,10 +50,10 @@ class DistractiveEnv(GridEnv):
         )
 
         super().__init__(
-            agentPOV,
             env_settings=env_settings,
             render_settings=render_settings,
             env_objects=env_objects,
+            agent_pov=agentPOV,
         )
 
     def _task(self) -> bool:

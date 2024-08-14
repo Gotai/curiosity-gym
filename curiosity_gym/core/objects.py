@@ -34,8 +34,8 @@ class GridObject(ABC):
     def render(self, canvas: pygame.Surface, pixelsquare: float):
         pass
 
-    def get_identity(self) -> np.ndarray:
-        return np.array([self.__class__.id, self.color, self.state])
+    def get_identity(self) -> tuple[int|None,int,int]:
+        return (self.__class__.id, self.color, self.state)
 
     def interact(self, agent: Self) -> None:
         pass

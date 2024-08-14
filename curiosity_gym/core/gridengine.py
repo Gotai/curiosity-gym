@@ -6,36 +6,40 @@ import numpy as np
 import pygame
 
 from core import objects
-from core.agentpov import AgentPOV
+from core.agentpov import AgentPOV, GlobalView, LocalView
 from utils.enums import Action
 from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
-class GridEnv(gym.Env, ABC):
+class GridEngine(gym.Env, ABC):
     """Placeholder"""
+
+    # pylint: disable=too-many-instance-attributes
+    # Additional instance attributes are required for this class, to cover the gym.Env interface.
 
     def __init__(
         self,
-        agent_pov: AgentPOV,
         env_settings: EnvironmentSettings,
         render_settings: RenderSettings,
         env_objects: EnvironmentObjects,
+        agent_pov: AgentPOV | str,
     ) -> None:
 
-        # Get Action & Observations spaces
-        self.agent_pov = agent_pov
-        self.action_space = agent_pov.action_space
-        self.observation_space = agent_pov.observation_space
-
-        # Store Settings
+        # Store settings
         self.env_settings = env_settings
         self.render_settings = render_settings
+        self.reward_range = env_settings.reward_range
 
-        # Current Environment State
+        # Initialise agent pov
+        self.agent_pov = self._init_pov(agent_pov)
+        self.action_space = self.agent_pov.action_space
+        self.observation_space = self.agent_pov.observation_space
+
+        # Current environment state
         self.objects = env_objects
         self.step_count = 0
 
-        # Initialise Render Objects
+        # Initialise render objects
         if self.render_settings.render_mode == "human":
             self.init_render()
 
@@ -48,20 +52,21 @@ class GridEnv(gym.Env, ABC):
         for ob in self.objects.get_non_wall():
             reward += ob.step(
                 Action(action),
-                self._find_object(self.objects.agent.get_front()),
+                self.find_object(self.objects.agent.get_front()),
                 self._check_walkable(self.objects.agent.get_front()),
                 )
 
         self.step_count += 1
         reward += (self.env_settings.min_steps / self.step_count *
                    self.env_settings.reward_range[1]) if self._task() else 0
+        obs = self._get_obs()
 
         if self.render_settings.render_mode == "human":
             pygame.display.set_caption(f"Curiosity Gym [Current Steps: {self.step_count}, " +
                                         f"Step reward: {reward}]")
             self._render_frame()
 
-        return self._get_obs(), reward, self._get_terminated(), False, self._get_info()
+        return obs, reward, self._get_terminated(), False, self._get_info()
 
     def reset(self, **kwargs) -> tuple[np.ndarray, dict]:
         super().reset(**kwargs)
@@ -84,7 +89,7 @@ class GridEnv(gym.Env, ABC):
         return objects.GridObject.id_map
 
     def get_state(self) -> np.ndarray:
-        state = np.zeros([self.env_settings.width * self.env_settings.height, 3])
+        state = np.zeros([self.env_settings.width * self.env_settings.height, 3], dtype=int)
         for ob in self.objects.get_all():
             x,y = ob.position
             assert x + y * self.env_settings.width < len(state), \
@@ -109,7 +114,7 @@ class GridEnv(gym.Env, ABC):
         for ob in self.objects.get_all():
             ob_simulated = ob.simulate(
                 Action(action),
-                self._find_object(self.objects.agent.get_front()),
+                self.find_object(self.objects.agent.get_front()),
                 self._check_walkable(self.objects.agent.get_front())
                 )
             x,y = ob_simulated.position
@@ -134,7 +139,7 @@ class GridEnv(gym.Env, ABC):
                 return True
         return False
 
-    def _find_object(self, position: np.ndarray) -> objects.GridObject | None:
+    def find_object(self, position: np.ndarray) -> objects.GridObject | None:
         for ob in self.objects.get_non_wall():
             if np.all(ob.position == position):
                 return ob
@@ -151,18 +156,35 @@ class GridEnv(gym.Env, ABC):
         or self._check_harmful(self.objects.agent.position)
         or self._task())
 
+    def _init_pov(self, agent_pov: AgentPOV | str) -> AgentPOV:
+        assert isinstance(agent_pov, (AgentPOV, str)), (
+            f"Invalid type of agent_pov: {type(agent_pov)}")
+
+        if isinstance(agent_pov, AgentPOV):
+            return agent_pov
+
+        if agent_pov.lower() == "global":
+            return GlobalView(self.env_settings.width, self.env_settings.height)
+
+        if agent_pov.lower().startswith("local_"):
+            radius = agent_pov[6:]
+            assert radius.isnumeric(), f"Invalid radius for local pov: {radius}"
+            return LocalView(int(radius), self.env_settings.width, self.env_settings.height)
+
+        raise ValueError(f"Invalid agent pov: {agent_pov}.")
+
     def _render_frame(self) -> np.ndarray | None:
-        # Define Canvas for new Frame
+        # Define canvas for new Frame
         window_size = (self.render_settings.window_width, self.render_settings.window_height)
         canvas = pygame.Surface(window_size)
         canvas.fill((255, 255, 255))
 
-        # Draw Objects
+        # Draw objects
         tilesize = window_size[0] / self.env_settings.width
         for ob in self.objects.get_all():
             ob.render(canvas, tilesize)
 
-        # Draw Grid Lines
+        # Draw grid lines
         line_color = (210, 210, 210)
         for x in range(self.env_settings.height + 1):
             pygame.draw.line(
@@ -181,7 +203,14 @@ class GridEnv(gym.Env, ABC):
                 width=3,
             )
 
-        # Display Canvas in Window
+        # Add overlay for visible cells
+        for pos in self.agent_pov.visible_positions:
+            overlay = pygame.Surface((tilesize, tilesize))
+            overlay.set_alpha(30)
+            overlay.fill((255,153,20))
+            canvas.blit(overlay, (pos[0] * tilesize, pos[1] * tilesize))
+
+        # Display canvas in window
         if self.render_settings.render_mode == "human":
             assert self.render_settings.window is not None, "No window defined"
             assert self.render_settings.clock is not None, "No clock defined"

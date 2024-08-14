@@ -1,26 +1,29 @@
 import time
+import unittest
 from dataclasses import dataclass
 
 import numpy as np
 
-from core.gridenv import GridEnv
-#from tests.test_cases import CASES
+from core.gridengine import GridEngine
 
 
 @dataclass
-class Testcase:
+class Testcase(unittest.TestCase):
     identifier: int
-    environment: GridEnv
+    environment: GridEngine
     actions: list[int]
     position: tuple[int,int]
     state: int
     reward: float
     terminated: bool
+    reward_max: float | None = None
 
     def test(self) -> bool:
         self.environment.reset()
+        reward_total = 0
         for action in self.actions:
             _, reward, terminated, _, _ = self.environment.step(action)
+            reward_total += reward
 
         agent = self.environment.objects.agent
 
@@ -48,6 +51,12 @@ class Testcase:
             f" Expected {self.terminated}."
         )
 
+        # Test maximum total reward for an episode
+        assert self.reward_max is None or self.reward_max > reward_total, (
+            f"Total reward {reward_total} is greater than expected maximum reward"
+            f" of {self.reward_max} in test with id {self.identifier}."
+        )
+
         return True
 
 
@@ -59,6 +68,12 @@ class Testsuite:
         for case in self.cases:
             case.test()
         print("All test cases passed.")
+
+    def run(self, identifier):
+        for case in self.cases:
+            if case.identifier == identifier:
+                case.test()
+                print(f"Test with id {identifier} passed.")
 
     def show(self, identifier):
         for case in self.cases:

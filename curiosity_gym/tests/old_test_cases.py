@@ -2,7 +2,7 @@ from core.agentpov import FullView
 from envs.sparseenv import SparseEnv
 from envs.distractiveenv import DistractiveEnv
 from envs.multitaskenv import MultitaskEnv
-from tests.test_scripts import Testcase, Testsuite
+from tests.old_test_scripts import Testcase, Testsuite
 
 
 env_sparse = SparseEnv(FullView())
@@ -132,13 +132,29 @@ testsuite = Testsuite([
         actions = [1,0,0,2,0,0,0,0,1,0],
     ),
 
+    # Case 9: Sum of small rewards.
+    #
+    # Objective: Test distractive characteristic of small rewards.
+    # Actions: Move over all small rewards.
+    # Expected: A reward less then the maxium reward without episode termination.
+    Testcase(
+        identifier = 9,
+        environment= env_distractive,
+        position = (1,5),
+        state = 3,
+        reward = 0.1,
+        terminated = False,
+        actions = [1,0,0,2,0,0,0,0,1,0,0,1,0,0,0,0,2,0,0,2,0,0,0,0,1,0,0,1,0,0,0,0,2,0,0,2,0,0,0,0],
+        reward_max = env_distractive.env_settings.reward_range[1]
+    ),
+
     # Case 9: Target distractive reward.
     #
     # Objective: Test completion of distractive reward environment.
     # Actions: Move to target location (right side).
     # Expected: Maximum reward + episode termination.
     Testcase(
-        identifier = 9,
+        identifier = 10,
         environment= env_distractive,
         position = (21,5),
         state = 3,
