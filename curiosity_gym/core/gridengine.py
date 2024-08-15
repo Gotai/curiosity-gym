@@ -6,7 +6,7 @@ import numpy as np
 import pygame
 
 from core import objects
-from core.agentpov import AgentPOV, GlobalView, LocalView
+from core.agentpov import AgentPOV, GlobalView, LocalView, ForwardView
 from utils.enums import Action
 from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
@@ -168,8 +168,23 @@ class GridEngine(gym.Env, ABC):
 
         if agent_pov.lower().startswith("local_"):
             radius = agent_pov[6:]
-            assert radius.isnumeric(), f"Invalid radius for local pov: {radius}"
+            assert radius.isnumeric() and int(radius) >= 0, \
+                  f"Invalid radius for local pov: {radius}"
             return LocalView(int(radius), self.env_settings.width, self.env_settings.height)
+
+        if agent_pov.lower().startswith("forward_"):
+            pov_width = 1
+            pov_length = agent_pov[8:]
+            if "_" in pov_length:
+                pov_length, pov_width = pov_length.split("_")
+            assert str(pov_length).isnumeric() and int(pov_length) >= 0, \
+                f"Invalid length for forward pov: {pov_length}."
+            assert str(pov_width).isnumeric() and int(pov_width) >= 0, \
+                f"Invalid width for forward pov: {pov_width}."
+            assert int(pov_width) % 2 == 1, \
+                f"Invalid width {pov_width} for pov. Width must be odd."
+            return ForwardView(int(pov_length), int(pov_width),
+                               self.env_settings.width, self.env_settings.height)
 
         raise ValueError(f"Invalid agent pov: {agent_pov}.")
 
