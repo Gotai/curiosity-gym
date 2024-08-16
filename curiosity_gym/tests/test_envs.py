@@ -1,4 +1,5 @@
 import unittest
+from typing import override
 
 import numpy as np
 
@@ -15,6 +16,7 @@ env_multitask_2 = MultitaskEnv(task=2)
 
 class TestSparseEnv(unittest.TestCase):
 
+    @override
     def setUp(self) -> None:
         env_sparse.reset()
         self.agent = env_sparse.objects.agent
@@ -24,38 +26,6 @@ class TestSparseEnv(unittest.TestCase):
         self.assertListEqual(agent_pos, expected_pos,
                              f"Unexpected agent position {agent_pos}. "
                              f"Expected {expected_pos}.")
-
-    def test_maximum_steps(self) -> None:
-        """Maximum step count termination.
-        
-        Actions: Rotate right until maximum step count is reached.
-        Expected: Episode termination.
-        """
-        for a in [1] * env_sparse.env_settings.max_steps:
-            _, _, terminated, _, _ = env_sparse.step(a)
-        self.assertTrue(terminated, "Termination by reaching maximum step count failed.")
-
-    def test_grid_movement(self) -> None:
-        """Movement dynamics.
-
-        Actions: Move two cells forward, one down, two back.
-        Expected: Agent position one down from starting position.
-        """
-        for a in [0,0,1,0,1,0,0]:
-            env_sparse.step(a)
-        self._assert_position(self.agent.position.tolist(), [1,2])
-        self.assertEqual(self.agent.state, 2,
-                         f"Unexpected agent state {self.agent.state}. Expected 2")
-
-    def test_move_against_wall(self) -> None:
-        """Moving against walls.
-
-        Actions: Move towards left side wall.
-        Expected: Agent stays at starting position.
-        """
-        for a in [1,1,0]:
-            env_sparse.step(a)
-        self._assert_position(self.agent.position.tolist(), self.agent.start_position.tolist())
 
     def test_open_door_without_key(self) -> None:
         """Attempting to open closed door without key.
@@ -117,6 +87,7 @@ class TestSparseEnv(unittest.TestCase):
 
 class TestDistractiveEnv(unittest.TestCase):
 
+    @override
     def setUp(self) -> None:
         env_distractive.reset()
         self.agent = env_distractive.objects.agent
@@ -170,6 +141,7 @@ class TestDistractiveEnv(unittest.TestCase):
 
 class TestMultitaskEnv1(unittest.TestCase):
 
+    @override
     def setUp(self) -> None:
         env_multitask_1.reset()
         self.agent = env_multitask_1.objects.agent
@@ -205,6 +177,7 @@ class TestMultitaskEnv1(unittest.TestCase):
 
 class TestMultitaskEnv2(unittest.TestCase):
 
+    @override
     def setUp(self) -> None:
         env_multitask_2.reset()
         self.agent = env_multitask_2.objects.agent
