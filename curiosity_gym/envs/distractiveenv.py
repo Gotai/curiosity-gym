@@ -43,7 +43,7 @@ class DistractiveEnv(GridEngine):
         ])
 
         env_objects = EnvironmentObjects(
-            agent = objects.Agent((11,1), color=1, state=3),
+            agent = objects.Agent((11,1), state=3),
             target = objects.Target((21,5), color=2),
             walls = self.load_walls(MAP_DISTRACTIVE),
             other = other_objects,

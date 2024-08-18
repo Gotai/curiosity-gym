@@ -9,10 +9,10 @@ ROTATION_TO_STATE = {
 }
 
 STATE_TO_ROTATION = {
-    0: np.array((1,0)),
-    1: np.array((0,1)),
-    2: np.array((-1,0)),
-    3: np.array((0,-1)),
+    0: np.array((1,0)), # right
+    1: np.array((0,1)), # up
+    2: np.array((-1,0)), # left
+    3: np.array((0,-1)), # down
 }
 
 IX_TO_COLOR = {

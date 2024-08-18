@@ -35,8 +35,8 @@ class AgentPOV(ABC):
         x, y = pos_agent[0] + dx, pos_agent[1] + dy
 
         while (x, y) != (pos_cell[0], pos_cell[1]):
-            if state[x + y * self.width][0] == objects.Wall.id or \
-                state[x + y * self.width][0] == objects.Door.id and \
+            if state[x + y * self.width][0] == objects.Wall.identifier or \
+                state[x + y * self.width][0] == objects.Door.identifier and \
                 state[x + y * self.width][2] == 2:
                 return False
 

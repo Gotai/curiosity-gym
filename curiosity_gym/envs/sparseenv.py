@@ -58,7 +58,7 @@ class SparseEnv(GridEngine):
         ])
 
         env_objects = EnvironmentObjects(
-            agent = objects.Agent((1,1), color=1),
+            agent = objects.Agent((1,1)),
             target = objects.Target((7,4), color=2),
             walls = self.load_walls(MAP_SPARSE),
             other = other_objects,

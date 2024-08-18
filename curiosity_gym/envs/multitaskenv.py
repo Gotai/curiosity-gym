@@ -48,7 +48,7 @@ class MultitaskEnv(GridEngine):
         ])
 
         env_objects = EnvironmentObjects(
-            agent = objects.Agent((9,3), color=1, state=1),
+            agent = objects.Agent((9,3), state=1),
             target = objects.Target((3,3), color=2),
             walls = self.load_walls(MAP_MULTITASK),
             other = other_objects,

@@ -11,10 +11,33 @@ from utils.enums import Action
 
 
 class GridObject(ABC):
+    """Abstract class representing elements that can be placed in a grid environment. \n
+    It contains the attributes position, color, and state, which define the characteristics
+    and behavior of the object. The class maintains a unique identifier for each subclass 
+    and provides default implementations of the :meth:`~core.objects.GridObject.reset`, 
+    :meth:`~core.objects.GridObject.simulate`, :meth:`~core.objects.GridObject.get_identity`,
+    :meth:`~core.objects.GridObject.is_walkable` and :meth:`~core.objects.GridObject.is_harmful` 
+    methods. It enforces the implementation of a :meth:`~core.objects.GridObject.render`
+    method by all subclasses.
+
+    Parameters
+    ----------
+    position : tuple[int,int]
+        Position in the grid where the object will be placed. Values must be in range
+        (:attr:`~core.gridengine.env_settings.width` - 1, 
+        :attr:`~core.gridengine.env_settings.height` - 1).
+    color : int
+        Color of the grid object. Values must be in range(0,10). 
+        Color mappings are defined in :const:`utils.constants.IX_TO_COLOR`.
+    state : int
+        State of the grid object. State characteristics vary by object type. 
+        Values must be in range(0,4).
+    """
+
     # Class-level attributes
-    id = None
-    next_id = 1
-    id_map = {}
+    identifier = None
+    _next_id = 1
+    _id_map = {}
 
     def __init__(self, position: tuple[int,int], color: int = 0, state: int = 0) -> None:
         self.start_position = np.array(position)
@@ -26,21 +49,49 @@ class GridObject(ABC):
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
-        cls.id = GridObject.next_id
-        GridObject.id_map[GridObject.next_id] = cls
-        GridObject.next_id += 1
+        cls.identifier = GridObject._next_id
+        GridObject._id_map[GridObject._next_id] = cls
+        GridObject._next_id += 1
 
     @abstractmethod
     def render(self, canvas: pygame.Surface, pixelsquare: float):
-        pass
+        """Render grid object in PyGame. \n
+        Must be implemented by each grid object type to allow visual recognition
+        in *human* rendering mode.
+
+        Parameters
+        ----------
+        canvas : pygame.Surface
+            The PyGame window, in which the grid objects are rendered.
+        pixelsquare : float
+            The size of a single square in the grid environment.
+        """
 
     def get_identity(self) -> tuple[int|None,int,int]:
-        return (self.__class__.id, self.color, self.state)
+        """Return a tuple that uniquely identifies the grid object.
+
+        Returns
+        -------
+        tuple[int | None, int, int]
+            A tuple consisting of :attr:`~identifier`, :attr:`~color` and :attr:`~state`. 
+        """
+        return (self.__class__.identifier, self.color, self.state)
 
     def interact(self, agent: Self) -> None:
-        pass
+        """Interact with agent. \n
+        Concrete interaction depends on grid object type. The default interaction has no effect.
+
+        Parameters
+        ----------
+        agent : :class:`~Agent`
+            Agent object performing the interaction.
+        """
 
     def reset(self):
+        """Reset attributes of the grid object to their starting values. \n
+        Sets :attr:`~position`, :attr:`~state` and :attr:`~color` to their respective values 
+        assigned when the object was initialised.
+        """
         self.position = self.start_position
         self.state = self.start_state
         self.color = self.start_color
@@ -51,6 +102,23 @@ class GridObject(ABC):
         front_object: Self | None = None,
         walkable: bool = False,
         ) -> float:
+        """Compute grid object changes after single timestep. \n
+        The default step behaviour is idle and gives 0 reward.
+
+        Parameters
+        ----------
+        action : :type:`~utils.enums.Action`
+            Action taken in a grid environment by the RL agent.
+        front_object : :type:`GridObject` | None, optional
+            Grid object currently in front of the RL agent, by default None.
+        walkable : bool, optional
+            Wheter the agent can move over the cell in front, by default False.
+
+        Returns
+        -------
+        float
+            Optional reward, which is independent of the environment task and episode termination.
+        """
         del action, front_object, walkable
         return 0
 
@@ -59,18 +127,71 @@ class GridObject(ABC):
         front_object: Self | None = None,
         walkable: bool = False,
         ) -> Self:
+        """Simulate how grid object would change if a given action were taken. \n
+        Is used in the :meth:`core.gridengine.simulate` method to get the state of 
+        the environment if a given action is performed by the RL agent.
+        
+        Parameters
+        ----------
+        action : :type:`~utils.enums.Action`
+            Action of the RL agent to be simulated.
+        front_object : :type:`GridObject` | None, optional
+            Grid object currently in front of the RL agent, by default None.
+        walkable : bool, optional
+            Wheter the agent can move over the cell in front, by default False.
+
+        Returns
+        -------
+        :type:`GridObject`
+            Copy of the grid object, including changes caused by the given action.
+        """
         simulated = copy.deepcopy(self)
         simulated.step(action, front_object, walkable)
         return simulated
 
-    def walkable(self) -> bool:
+    def is_walkable(self) -> bool:
+        """Determine whether agent can move on grid object.\n
+        Returns :const:`False` by default. Walkable grid objects must override this method.
+
+        Returns
+        -------
+        bool
+            :const:`True` if agent can move over grid object, :const:`False` otherwise.
+        """
         return False
 
-    def isHarmful(self) -> bool:
+    def is_harmful(self) -> bool:
+        """Determine whether grid object is harmful to the agent. \n
+        Returns :const:`False` by default. Harmful grid objects must override this method.
+        Value is used in :class:`core.gridengine` to determine if episode ended.
+
+        Returns
+        -------
+        bool
+            :const:`True` if grid object is harmful, :const:`False` otherwise.
+        """
         return False
 
 
 class Agent(GridObject):
+    """Grid object representing the RL agent. \n
+    The color of the agent grid object cannot be specified at initialisation, as it is
+    used to represent collected :class:`~Key` objects. The agent color will always be 
+    initialised as 1 (orange).
+    
+    Parameters
+    ----------
+    position : tuple[int,int]
+        Position in the grid where the agent object will be placed. Values must be in range
+        (:attr:`~core.gridengine.env_settings.width` - 1, 
+        :attr:`~core.gridengine.env_settings.height` - 1).
+    state : int
+        :type:`Rotation` of the agent.
+    """
+
+    @override
+    def __init__(self, position: tuple[int,int], state: int = 0) -> None:
+        super().__init__(position, 1, state)
 
     @override
     def step(
@@ -79,6 +200,27 @@ class Agent(GridObject):
         front_object: Self | None = None,
         walkable: bool = False,
         ) -> float:
+        """Perform a given action. \n
+        The agent is the main recipient of the action specified in the step function of
+        the environment. For the action of moving forward, the agent considers the walkable 
+        parameter provided by the environment to determine if it can change its position 
+        accordingly. For the interaction action, the agent will call the :meth:`GridObject.interact`
+        method of the object in front of it.
+
+        Parameters
+        ----------
+        action : :type:`~utils.enums.Action`
+            Action taken in a grid environment by the RL agent.
+        front_object : :type:`GridObject` | None, optional
+            Grid object currently in front of the RL agent, by default None.
+        walkable : bool, optional
+            Wheter the agent can move over the cell in front, by default False.
+
+        Returns
+        -------
+        float
+            Returns 0.
+        """
 
         if action == Action.FORWARD and walkable:
             self.position = self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
@@ -114,12 +256,12 @@ class Agent(GridObject):
             0 # filled triangle
         )
 
-    def get_front(self) -> np.ndarray:
+    def _get_front(self) -> np.ndarray:
         return self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
 
 
 class Wall(GridObject):
-
+    """Non walkable grid object used to enclose spaces in the environment."""
     @override
     def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
         pygame.draw.rect(
@@ -133,7 +275,11 @@ class Wall(GridObject):
 
 
 class Target(GridObject):
-
+    """Grid object representing a task objective of the environment. \n
+    Is used to specify a target location that an agent shoud reach to 
+    gain a reward. Can also be used in combination with other objects
+    to define more complex task objectives.
+    """
     @override
     def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
         pygame.draw.rect(
@@ -146,14 +292,42 @@ class Target(GridObject):
         )
 
     @override
-    def walkable(self) -> bool:
+    def is_walkable(self) -> bool:
+        """Target grid objects are always walkable.
+
+        Returns
+        -------
+        bool
+            :const:`True`
+        """
         return True
 
 
 class Door(GridObject):
+    """Grid object with walkability depending on its state. \n
+    A closed door cannot be walked or seen through. Doors can be opened
+    by the agent through interaction. State 2 represents a locked door, 
+    that can only be opened if the agent has collected a :class:`Key` 
+    object of the same color. \n
+    Can be used in combination with :class:`Key` objects to introduce 
+    additional reward sparcity to an environment, as more precice 
+    actions are required for the agent to get the reward.
 
+    """
     @override
     def interact(self, agent: Agent):
+        """Interact with the door.
+        The result of the interaction depends on the door state prior to
+        the interaction. Closed doors (state = 1) can always be opened 
+        by interaction. Locked doors (state = 2) require the prior
+        collection of a :class:`Key` object of the same color to open.
+
+        Parameters
+        ----------
+        agent : :class:`~Agent`
+            Agent object performing the interaction.
+        """
+
         if self.state == 2 and agent.color != self.color:
             return
         if self.state == 2 and agent.color == self.color:
@@ -192,14 +366,32 @@ class Door(GridObject):
             )
 
     @override
-    def walkable(self) -> bool:
+    def is_walkable(self) -> bool:
+        """Return the walkability of a door, as determined by its state.
+        The agent can only walk through the door if it is open.
+
+        Returns
+        -------
+        bool
+            Returns :const:`True` if the state of the door is 0, 
+            :const:`False` otherwise.
+        """
         return self.state == 0
 
 
 class Key(GridObject):
+    """Collectable grid object that is used to unlock doors of the same color."""
 
     @override
     def interact(self, agent: Agent) -> None:
+        """Collect the key object and remove it from the environment.
+        The agent changes color according to the key collected.
+
+        Parameters
+        ----------
+        agent : :class:`~Agent`
+            Agent object performing the interaction.
+        """
         agent.color = self.color
         self.position = np.array([-1,-1])
 
@@ -229,6 +421,12 @@ class Key(GridObject):
 
 
 class RandomBlock(GridObject):
+    """A non walkable grid object that randomly changes color at every time step. \n
+    Can be used to test the `Noisy-TV problem <https://openai.com/index/reinforcement
+    -learning-with-prediction-based-rewards/#the-noisy-tv-problem>`__, where certain 
+    curiosity-based RL algorithms get stuck when encountering stochastic environment 
+    components.
+    """
 
     @override
     def step(
@@ -237,7 +435,10 @@ class RandomBlock(GridObject):
         front_object: Self | None = None,
         walkable: bool = False,
         ) -> float:
-        self.color = random.randint(3,len(IX_TO_COLOR)-1)
+        """Randomly change grid object color.
+        Available colors are taken from :const:`~utils.constants.IX_TO_COLOR`.
+        """
+        self.color = random.randint(0,len(IX_TO_COLOR)-1)
         return 0
 
     def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
@@ -256,19 +457,39 @@ class RandomBlock(GridObject):
 
 
 class Enemy(GridObject):
+    """Moving grid object harmful to the agent. \n
+    Is used to introduce additional reward sparcity by early episode termination.
 
+    Parameters
+    ----------
+    position : tuple[int,int]
+        Position in the grid where the object will be placed. Values must be in range
+        (:attr:`~core.gridengine.env_settings.width` - 1, 
+        :attr:`~core.gridengine.env_settings.height` - 1).
+    state : int
+        State of the enemy grid object. Determines current movement direction.
+    reach : int
+        Number of cells the enemy can move from its starting position.
+    """
     @override
     def __init__(self,
                  position: tuple[int,int],
-                 color: int = 9,
                  state: int = 0,
                  reach: int = 2
                  ) -> None:
-        super().__init__(position, color, state)
+        super().__init__(position, 9, state)
         self.reach = reach
 
     @override
-    def isHarmful(self) -> bool:
+    def is_harmful(self) -> bool:
+        """The enemy grid object is always harmful to the agent.\n
+        This will terminate the episode if agent and an enemy are
+        on the same grid position.
+        Returns
+        -------
+        bool
+            :const:`True`
+        """
         return True
 
     @override
@@ -278,6 +499,23 @@ class Enemy(GridObject):
         front_object: Self | None = None,
         walkable: bool = False,
         ) -> float:
+        """Perform enemy movement.
+        Behaviour is determined by starting position and reach of the enemy grid object.
+
+        Parameters
+        ----------
+        action : :type:`~utils.enums.Action`
+            Action taken in a grid environment by the RL agent.
+        front_object : :type:`GridObject` | None, optional
+            Grid object currently in front of the RL agent, by default None.
+        walkable : bool, optional
+            Wheter the agent can move over the cell in front, by default False.
+
+        Returns
+        -------
+        float
+            Returns 0.
+        """
         self.position = self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
         if self.position[self.state%2] == self.start_position[self.state%2] + self.reach or \
         self.position[self.state%2] == self.start_position[self.state%2] - self.reach or \
@@ -286,7 +524,15 @@ class Enemy(GridObject):
         return 0
 
     @override
-    def walkable(self) -> bool:
+    def is_walkable(self) -> bool:
+        """The enemy grid object is always walkable. 
+        Allows for episode termination by enemy contact.
+
+        Returns
+        -------
+        bool
+            :const:`True`
+        """
         return True
 
     @override
@@ -324,19 +570,36 @@ class Enemy(GridObject):
 
 
 class SmallReward(GridObject):
+    """Grid object yielding a small reward when agent moves over it.
+
+    Parameters
+    ----------
+    position : tuple[int,int]
+        Position in the grid where the object will be placed. Values must be in range
+        (:attr:`~core.gridengine.env_settings.width` - 1, 
+        :attr:`~core.gridengine.env_settings.height` - 1).
+    reward : float
+        Amount of reward to yield when agent walks over the grid object.
+    """
 
     @override
     def __init__(self,
                  position: tuple[int,int],
                  reward: float,
-                 color: int = 9,
-                 state: int = 0,
                  ) -> None:
-        super().__init__(position, color, state)
+        super().__init__(position, 9, 0)
         self.reward = reward
 
     @override
-    def walkable(self) -> bool:
+    def is_walkable(self) -> bool:
+        """SmallReward grid object is always walkable.
+        Allows for the agent to collect the reward by walking over it.
+
+        Returns
+        -------
+        bool
+            :const:`True`
+        """
         return True
 
     @override
@@ -346,6 +609,23 @@ class SmallReward(GridObject):
         front_object: Self | None = None,
         walkable: bool = False,
         ) -> float:
+        """Determine whether agent is walking over the grid object.
+
+        Parameters
+        ----------
+        action : :type:`~utils.enums.Action`
+            Action taken in a grid environment by the RL agent.
+        front_object : :type:`GridObject` | None, optional
+            Grid object currently in front of the RL agent, by default None.
+        walkable : bool, optional
+            Wheter the agent can move over the cell in front, by default False.
+
+        Returns
+        -------
+        float
+            Returns :attr:`SmallReward.reward` if agent is moving over small reward
+            object, 0 otherwise.
+        """
         if front_object == self:
             self.position = np.array([-1,-1])
             return self.reward
@@ -368,6 +648,23 @@ class SmallReward(GridObject):
 
 
 class Ball(GridObject):
+    """Non walkable grid object that can be moved by agent interaction. \n
+    Can be used to define more complex task objectives that differ from
+    navigation tasks.
+
+    Parameters
+    ----------
+    position : tuple[int,int]
+        Position in the grid where the object will be placed. Values must be in range
+        (:attr:`~core.gridengine.env_settings.width` - 1, 
+        :attr:`~core.gridengine.env_settings.height` - 1).
+    zone_low : tuple[int,int]
+        Low boundaries of the zone in which the ball grid object can be moved.
+    zone_high: tuple[int,int]
+        High boundaries of the zone in which the ball grid object can be moved.
+    color : int
+        Color of the grid object.
+    """
 
     @override
     def __init__(self,
@@ -382,6 +679,15 @@ class Ball(GridObject):
 
     @override
     def interact(self, agent: Agent) -> None:
+        """Move ball one cell in direction of agent rotation.
+        Only works if new location is in zone defined by :attr:`Ball.zone_low`,
+        :attr:`Ball.zone_high`.
+
+        Parameters
+        ----------
+        agent : :class:`~Agent`
+            Agent object performing the interaction.
+        """
         pos_new = self.position + self.position - agent.position
         if (self.zone_low[0] <= pos_new[0] <= self.zone_high[0]) and (
             self.zone_low[1] <= pos_new[1] <= self.zone_high[1]):

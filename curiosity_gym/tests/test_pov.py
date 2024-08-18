@@ -125,10 +125,10 @@ class TestPOVForward(unittest.TestCase):
         Expected: Agent is at the middle of the first row [(pov_width-1)/2] of the observation.
         """
         observation, _, _, _, _ = self.env_2_1.step(0)
-        self.assertEqual(observation[0][0], objects.Agent.id,
+        self.assertEqual(observation[0][0], objects.Agent.identifier,
                          "Agent is not at expected index of observations for pov 'forward_2_1'.")
         observation, _, _, _, _ = self.env_4_3.step(0)
-        self.assertEqual(observation[1][0], objects.Agent.id,
+        self.assertEqual(observation[1][0], objects.Agent.identifier,
                          "Agent is not at expected index of observations for pov 'forward_4_3'.")
 
     def test_see_through_walls(self) -> None:
@@ -139,7 +139,7 @@ class TestPOVForward(unittest.TestCase):
         """
         for a in [2,0,0]:
             observation, _, _, _, _ = self.env_4_3.step(a)
-        self.assertNotEqual(observation[10][0], objects.Target.id,
+        self.assertNotEqual(observation[10][0], objects.Target.identifier,
                             "Agent can see target through wall in multitask environment.")
 
     def test_see_objects_relative_to_agent(self) -> None:
@@ -149,5 +149,5 @@ class TestPOVForward(unittest.TestCase):
         Expected: Agent sees ball at index 10.
         """
         observation, _, _, _, _ = self.env_4_3.step(1)
-        self.assertEqual(observation[10][0], objects.Ball.id,
+        self.assertEqual(observation[10][0], objects.Ball.identifier,
                          "Agent can not see ball for pov 'forward_4_3' in multitask environment.")

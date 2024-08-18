@@ -86,7 +86,7 @@ class GridEngine(gym.Env, ABC):
             pygame.quit()
 
     def get_object_ids(self) -> dict[objects.GridObject, int]:
-        return objects.GridObject.id_map
+        return objects.GridObject._id_map
 
     def get_state(self) -> np.ndarray:
         state = np.zeros([self.env_settings.width * self.env_settings.height, 3], dtype=int)
@@ -129,13 +129,13 @@ class GridEngine(gym.Env, ABC):
             return False
 
         for ob in self.objects.get_all():
-            if np.all(ob.position == position) and not ob.walkable():
+            if np.all(ob.position == position) and not ob.is_walkable():
                 return False
         return True
 
     def _check_harmful(self, position: np.ndarray) -> bool:
         for ob in self.objects.other:
-            if np.all(ob.position == position) and ob.isHarmful():
+            if np.all(ob.position == position) and ob.is_harmful():
                 return True
         return False
 
