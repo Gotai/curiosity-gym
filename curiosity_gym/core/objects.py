@@ -6,8 +6,8 @@ from typing import Self, override
 import numpy as np
 import pygame
 
-from utils.constants import IX_TO_COLOR, STATE_TO_ROTATION
-from utils.enums import Action
+from curiosity_gym.utils.constants import IX_TO_COLOR, STATE_TO_ROTATION
+from curiosity_gym.utils.enums import Action
 
 
 class GridObject(ABC):
@@ -37,7 +37,7 @@ class GridObject(ABC):
     # Class-level attributes
     identifier = None
     _next_id = 1
-    _id_map = {}
+    id_map = {}
 
     def __init__(self, position: tuple[int,int], color: int = 0, state: int = 0) -> None:
         self.start_position = np.array(position)
@@ -50,7 +50,7 @@ class GridObject(ABC):
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         cls.identifier = GridObject._next_id
-        GridObject._id_map[GridObject._next_id] = cls
+        GridObject.id_map[GridObject._next_id] = cls
         GridObject._next_id += 1
 
     @abstractmethod
@@ -256,7 +256,7 @@ class Agent(GridObject):
             0 # filled triangle
         )
 
-    def _get_front(self) -> np.ndarray:
+    def get_front(self) -> np.ndarray:
         return self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
 
 

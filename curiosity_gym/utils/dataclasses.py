@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import pygame
 
-from core import objects
+from curiosity_gym.core import objects
 
 
 @dataclass

@@ -2,11 +2,11 @@ from typing import override
 
 import numpy as np
 
-from core import objects
-from core.agentpov import AgentPOV
-from core.gridengine import GridEngine
-from utils.constants import MAP_MULTITASK
-from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
+from curiosity_gym.core import objects
+from curiosity_gym.core.agentpov import AgentPOV
+from curiosity_gym.core.gridengine import GridEngine
+from curiosity_gym.utils.constants import MAP_MULTITASK
+from curiosity_gym.utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
 class MultitaskEnv(GridEngine):

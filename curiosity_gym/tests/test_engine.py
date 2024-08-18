@@ -1,7 +1,7 @@
 import unittest
 from typing import override
 
-from envs.multitaskenv import MultitaskEnv
+from curiosity_gym.envs.multitaskenv import MultitaskEnv
 
 env = MultitaskEnv(task=1)
 

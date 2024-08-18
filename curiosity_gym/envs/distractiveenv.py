@@ -2,11 +2,11 @@ from typing import override
 
 import numpy as np
 
-from core import objects
-from core.agentpov import AgentPOV
-from core.gridengine import GridEngine
-from utils.constants import MAP_DISTRACTIVE
-from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
+from curiosity_gym.core import objects
+from curiosity_gym.core.agentpov import AgentPOV
+from curiosity_gym.core.gridengine import GridEngine
+from curiosity_gym.utils.constants import MAP_DISTRACTIVE
+from curiosity_gym.utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
 class DistractiveEnv(GridEngine):
@@ -35,11 +35,11 @@ class DistractiveEnv(GridEngine):
         )
 
         other_objects = np.array([
-            objects.SmallReward((8,5), reward = 0.1, color=8),
-            objects.SmallReward((6,1), reward = 0.1, color=8),
-            objects.SmallReward((4,5), reward = 0.1, color=8),
-            objects.SmallReward((2,1), reward = 0.1, color=8),
-            objects.SmallReward((1,5), reward = 0.1, color=8),
+            objects.SmallReward((8,5), reward = 0.1),
+            objects.SmallReward((6,1), reward = 0.1),
+            objects.SmallReward((4,5), reward = 0.1),
+            objects.SmallReward((2,1), reward = 0.1),
+            objects.SmallReward((1,5), reward = 0.1),
         ])
 
         env_objects = EnvironmentObjects(

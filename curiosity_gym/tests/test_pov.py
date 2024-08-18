@@ -3,8 +3,8 @@ from typing import override
 
 import numpy as np
 
-from core import objects
-from envs.multitaskenv import MultitaskEnv
+from curiosity_gym.core import objects
+from curiosity_gym.envs.multitaskenv import MultitaskEnv
 
 envs = {
     "global": MultitaskEnv(agentPOV="global"),

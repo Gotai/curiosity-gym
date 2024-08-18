@@ -3,10 +3,10 @@ from typing import override
 
 import numpy as np
 
-from core import objects
-from envs.sparseenv import SparseEnv
-from envs.distractiveenv import DistractiveEnv
-from envs.multitaskenv import MultitaskEnv
+from curiosity_gym.core import objects
+from curiosity_gym.envs.sparseenv import SparseEnv
+from curiosity_gym.envs.distractiveenv import DistractiveEnv
+from curiosity_gym.envs.multitaskenv import MultitaskEnv
 
 env_sparse = SparseEnv()
 env_distractive = DistractiveEnv()

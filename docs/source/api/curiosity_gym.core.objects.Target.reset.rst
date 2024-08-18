@@ -1,0 +1,6 @@
+curiosity\_gym.core.objects.Target.reset
+========================================
+
+.. currentmodule:: curiosity_gym.core.objects
+
+.. automethod:: Target.reset

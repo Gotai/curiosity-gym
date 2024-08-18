@@ -5,10 +5,10 @@ import gymnasium as gym
 import numpy as np
 import pygame
 
-from core import objects
-from core.agentpov import AgentPOV, GlobalView, LocalView, ForwardView
-from utils.enums import Action
-from utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
+from curiosity_gym.core import objects
+from curiosity_gym.core.agentpov import AgentPOV, GlobalView, LocalView, ForwardView
+from curiosity_gym.utils.enums import Action
+from curiosity_gym.utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
 
 
 class GridEngine(gym.Env, ABC):
@@ -86,7 +86,7 @@ class GridEngine(gym.Env, ABC):
             pygame.quit()
 
     def get_object_ids(self) -> dict[objects.GridObject, int]:
-        return objects.GridObject._id_map
+        return objects.GridObject.id_map
 
     def get_state(self) -> np.ndarray:
         state = np.zeros([self.env_settings.width * self.env_settings.height, 3], dtype=int)
