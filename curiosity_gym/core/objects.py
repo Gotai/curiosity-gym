@@ -1,3 +1,10 @@
+"""Object definitions for curiosity-gym grid environments.
+
+This module defines a collection of classes representing various objects for the grid-based
+RL environments. Each object can define its own properties, behaviors, and visual representation 
+within the environment.
+"""
+
 import copy
 import random
 from abc import ABC, abstractmethod
@@ -14,21 +21,19 @@ class GridObject(ABC):
     """Abstract class representing elements that can be placed in a grid environment. \n
     It contains the attributes position, color, and state, which define the characteristics
     and behavior of the object. The class maintains a unique identifier for each subclass 
-    and provides default implementations of the :meth:`~core.objects.GridObject.reset`, 
-    :meth:`~core.objects.GridObject.simulate`, :meth:`~core.objects.GridObject.get_identity`,
-    :meth:`~core.objects.GridObject.is_walkable` and :meth:`~core.objects.GridObject.is_harmful` 
-    methods. It enforces the implementation of a :meth:`~core.objects.GridObject.render`
-    method by all subclasses.
+    and provides default implementations of the :meth:`~reset`, :meth:`~simulate`, 
+    :meth:`~get_identity`, :meth:`~is_walkable` and :meth:`~is_harmful` methods. It enforces
+    the implementation of a :meth:`~render` method by all subclasses.
 
     Parameters
     ----------
     position : tuple[int,int]
         Position in the grid where the object will be placed. Values must be in range
-        (:attr:`~core.gridengine.env_settings.width` - 1, 
-        :attr:`~core.gridengine.env_settings.height` - 1).
+        (:attr:`~curiosity_gym.core.gridengine.env_settings.width` - 1, 
+        :attr:`~curiosity_gym.core.gridengine.env_settings.height` - 1).
     color : int
         Color of the grid object. Values must be in range(0,10). 
-        Color mappings are defined in :const:`utils.constants.IX_TO_COLOR`.
+        Color mappings are defined in :const:`~curiosity_gym.utils.constants.IX_TO_COLOR`.
     state : int
         State of the grid object. State characteristics vary by object type. 
         Values must be in range(0,4).
@@ -107,7 +112,7 @@ class GridObject(ABC):
 
         Parameters
         ----------
-        action : :type:`~utils.enums.Action`
+        action : :type:`~curiosity_gym.utils.enums.Action`
             Action taken in a grid environment by the RL agent.
         front_object : :type:`GridObject` | None, optional
             Grid object currently in front of the RL agent, by default None.
@@ -128,12 +133,12 @@ class GridObject(ABC):
         walkable: bool = False,
         ) -> Self:
         """Simulate how grid object would change if a given action were taken. \n
-        Is used in the :meth:`core.gridengine.simulate` method to get the state of 
+        Is used in the :meth:`curiosity_gym.core.gridengine.simulate` method to get the state of 
         the environment if a given action is performed by the RL agent.
         
         Parameters
         ----------
-        action : :type:`~utils.enums.Action`
+        action : :type:`~curiosity_gym.utils.enums.Action`
             Action of the RL agent to be simulated.
         front_object : :type:`GridObject` | None, optional
             Grid object currently in front of the RL agent, by default None.
@@ -163,7 +168,7 @@ class GridObject(ABC):
     def is_harmful(self) -> bool:
         """Determine whether grid object is harmful to the agent. \n
         Returns :const:`False` by default. Harmful grid objects must override this method.
-        Value is used in :class:`core.gridengine` to determine if episode ended.
+        Value is used in :class:`curiosity_gym.core.gridengine` to determine if episode ended.
 
         Returns
         -------
@@ -183,8 +188,8 @@ class Agent(GridObject):
     ----------
     position : tuple[int,int]
         Position in the grid where the agent object will be placed. Values must be in range
-        (:attr:`~core.gridengine.env_settings.width` - 1, 
-        :attr:`~core.gridengine.env_settings.height` - 1).
+        (:attr:`~curiosity_gym.core.gridengine.env_settings.width` - 1, 
+        :attr:`~curiosity_gym.core.gridengine.env_settings.height` - 1).
     state : int
         :type:`Rotation` of the agent.
     """
@@ -209,7 +214,7 @@ class Agent(GridObject):
 
         Parameters
         ----------
-        action : :type:`~utils.enums.Action`
+        action : :type:`~curiosity_gym.utils.enums.Action`
             Action taken in a grid environment by the RL agent.
         front_object : :type:`GridObject` | None, optional
             Grid object currently in front of the RL agent, by default None.
@@ -257,6 +262,13 @@ class Agent(GridObject):
         )
 
     def get_front(self) -> np.ndarray:
+        """Calculate position in front of the agent grid object.
+
+        Returns
+        -------
+        np.ndarray
+            Grid coordinates of the position.
+        """
         return self.position + STATE_TO_ROTATION[self.state] * np.array([1,-1])
 
 
@@ -436,7 +448,7 @@ class RandomBlock(GridObject):
         walkable: bool = False,
         ) -> float:
         """Randomly change grid object color.
-        Available colors are taken from :const:`~utils.constants.IX_TO_COLOR`.
+        Available colors are taken from :const:`~curiosity_gym.utils.constants.IX_TO_COLOR`.
         """
         self.color = random.randint(0,len(IX_TO_COLOR)-1)
         return 0
@@ -464,8 +476,8 @@ class Enemy(GridObject):
     ----------
     position : tuple[int,int]
         Position in the grid where the object will be placed. Values must be in range
-        (:attr:`~core.gridengine.env_settings.width` - 1, 
-        :attr:`~core.gridengine.env_settings.height` - 1).
+        (:attr:`~curiosity_gym.core.gridengine.env_settings.width` - 1, 
+        :attr:`~curiosity_gym.core.gridengine.env_settings.height` - 1).
     state : int
         State of the enemy grid object. Determines current movement direction.
     reach : int
@@ -504,7 +516,7 @@ class Enemy(GridObject):
 
         Parameters
         ----------
-        action : :type:`~utils.enums.Action`
+        action : :type:`~curiosity_gym.utils.enums.Action`
             Action taken in a grid environment by the RL agent.
         front_object : :type:`GridObject` | None, optional
             Grid object currently in front of the RL agent, by default None.
@@ -576,8 +588,8 @@ class SmallReward(GridObject):
     ----------
     position : tuple[int,int]
         Position in the grid where the object will be placed. Values must be in range
-        (:attr:`~core.gridengine.env_settings.width` - 1, 
-        :attr:`~core.gridengine.env_settings.height` - 1).
+        (:attr:`~curiosity_gym.core.gridengine.env_settings.width` - 1, 
+        :attr:`~curiosity_gym.core.gridengine.env_settings.height` - 1).
     reward : float
         Amount of reward to yield when agent walks over the grid object.
     """
@@ -613,7 +625,7 @@ class SmallReward(GridObject):
 
         Parameters
         ----------
-        action : :type:`~utils.enums.Action`
+        action : :type:`~curiosity_gym.utils.enums.Action`
             Action taken in a grid environment by the RL agent.
         front_object : :type:`GridObject` | None, optional
             Grid object currently in front of the RL agent, by default None.
@@ -656,8 +668,8 @@ class Ball(GridObject):
     ----------
     position : tuple[int,int]
         Position in the grid where the object will be placed. Values must be in range
-        (:attr:`~core.gridengine.env_settings.width` - 1, 
-        :attr:`~core.gridengine.env_settings.height` - 1).
+        (:attr:`~curiosity_gym.core.gridengine.env_settings.width` - 1, 
+        :attr:`~curiosity_gym.core.gridengine.env_settings.height` - 1).
     zone_low : tuple[int,int]
         Low boundaries of the zone in which the ball grid object can be moved.
     zone_high: tuple[int,int]

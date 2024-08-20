@@ -1,3 +1,11 @@
+"""Definitions for the curiosity-gym grid environment dynamics.
+
+This module defines the GridEngine class, which is the abstract
+base class for all curiosity-gym environments. It defines the
+grid-based dynamics for all environments and implements the 
+gymnasium api, which can be used to interact with RL algorithms. 
+"""
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -12,7 +20,22 @@ from curiosity_gym.utils.dataclasses import EnvironmentSettings, RenderSettings,
 
 
 class GridEngine(gym.Env, ABC):
-    """Placeholder"""
+    """Abstract grid-based environment class that implements the gymnasium api.
+
+    Parameters
+    ----------
+    env_settings : :class:`~curiosity_gym.utils.dataclasses.EnvironmentSettings`
+        Object storing settings for the environment.
+    render_settings : :class:`~curiosity_gym.utils.dataclasses.RenderSettings`
+        Object storing render settings that should be apllied when the environment
+        is used.
+    env_objects : :class:`~curiosity_gym.utils.dataclasses.EnvironmentObjects`
+        Object storing all grid objects that were placed in the environment.
+    agent_pov : :class:`~curiosity_gym.core.agentpov.AgentPOV` | str
+        Object or string defining the observations and action spaces of the RL agent.
+        Valid string values are *'global'*, *'local_W'* and *'forward_L_W'*, where 
+        W and L are integers defining the width and length of the respective POV.
+    """
 
     # pylint: disable=too-many-instance-attributes
     # Additional instance attributes are required for this class, to cover the gym.Env interface.
@@ -24,7 +47,6 @@ class GridEngine(gym.Env, ABC):
         env_objects: EnvironmentObjects,
         agent_pov: AgentPOV | str,
     ) -> None:
-
         # Store settings
         self.env_settings = env_settings
         self.render_settings = render_settings
