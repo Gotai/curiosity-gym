@@ -1,5 +1,5 @@
-﻿curiosity\_gym.core.objects.GridObject
-======================================
+﻿GridObject
+==========
 
 .. currentmodule:: curiosity_gym.core.objects
 

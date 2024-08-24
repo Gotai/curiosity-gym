@@ -1,5 +1,5 @@
-curiosity\_gym.core.gridengine.GridEngine.load\_walls
-=====================================================
+GridEngine.load\_walls
+======================
 
 .. currentmodule:: curiosity_gym.core.gridengine
 

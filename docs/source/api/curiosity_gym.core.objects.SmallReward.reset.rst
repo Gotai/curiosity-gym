@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.SmallReward.reset
-=============================================
+SmallReward.reset
+=================
 
 .. currentmodule:: curiosity_gym.core.objects
 

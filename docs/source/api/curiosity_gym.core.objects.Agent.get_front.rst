@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Agent.get\_front
-============================================
+Agent.get\_front
+================
 
 .. currentmodule:: curiosity_gym.core.objects
 

@@ -1,5 +1,5 @@
-curiosity\_gym.core.gridengine.GridEngine.simulate
-==================================================
+GridEngine.simulate
+===================
 
 .. currentmodule:: curiosity_gym.core.gridengine
 

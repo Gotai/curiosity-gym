@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Agent.render
-========================================
+Agent.render
+============
 
 .. currentmodule:: curiosity_gym.core.objects
 

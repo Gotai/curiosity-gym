@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Enemy.get\_identity
-===============================================
+Enemy.get\_identity
+===================
 
 .. currentmodule:: curiosity_gym.core.objects
 

@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Agent.reset
-=======================================
+Agent.reset
+===========
 
 .. currentmodule:: curiosity_gym.core.objects
 

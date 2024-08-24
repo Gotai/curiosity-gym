@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Enemy.simulate
-==========================================
+Enemy.simulate
+==============
 
 .. currentmodule:: curiosity_gym.core.objects
 

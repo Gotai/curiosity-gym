@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Door.get\_identity
-==============================================
+Door.get\_identity
+==================
 
 .. currentmodule:: curiosity_gym.core.objects
 

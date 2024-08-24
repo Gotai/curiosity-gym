@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Enemy.is\_harmful
-=============================================
+Enemy.is\_harmful
+=================
 
 .. currentmodule:: curiosity_gym.core.objects
 

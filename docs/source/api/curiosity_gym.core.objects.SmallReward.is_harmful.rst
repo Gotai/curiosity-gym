@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.SmallReward.is\_harmful
-===================================================
+SmallReward.is\_harmful
+=======================
 
 .. currentmodule:: curiosity_gym.core.objects
 

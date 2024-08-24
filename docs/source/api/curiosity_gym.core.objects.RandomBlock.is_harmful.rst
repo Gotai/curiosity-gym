@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.RandomBlock.is\_harmful
-===================================================
+RandomBlock.is\_harmful
+=======================
 
 .. currentmodule:: curiosity_gym.core.objects
 

@@ -1,3 +1,5 @@
+"""Definition of the curiosity-gym distractive rewards environment."""
+
 from typing import override
 
 import numpy as np
@@ -10,7 +12,34 @@ from curiosity_gym.utils.dataclasses import EnvironmentSettings, RenderSettings,
 
 
 class DistractiveEnv(GridEngine):
-    """Placeholder"""
+    """Defines the structure of the distractive rewards environment.\n
+    It consists of two corridors. The left corridor contains small but frequent
+    rewards, while the right corridor contains a larger but sparse reward. The
+    environment is designed to test the agent's capability of escaping local reward
+    optima (represented by the left corridor) to find a global sparse optimum
+    (represented by the right corridor). The maximum step count is set to 50, so
+    that the agent can not obtain rewards from both corridors within one episode.
+
+    Parameters
+    ----------
+    agentPOV : :class:`~curiosity_gym.core.agentpov.AgentPOV` | str, optional
+        Object or string defining the observations and action spaces of the RL agent.
+        Valid string values are *'global'*, *'local_W'* and *'forward_L_W'*, where 
+        *W* and *L* are integers defining the width and length of the respective POV.
+        By default :class:`~curiosity_gym.core.agentpov.GlobalView`.
+    render_mode : str | None, optional
+        Render mode in which the environment is run. If render mode is *human*, the 
+        environment will be rendered in PyGame. By default None.
+    window_width : int, optional
+        Horizontal size of the PyGame window in *human* render mode. By default 1200.
+
+        
+    .. figure:: ../../source/images/DistractiveEnv_optimal.gif
+        :width: 600
+        :align: center
+        
+        Example of DistractiveEnv with optimal policy.
+    """
 
     @override
     def __init__(
@@ -56,5 +85,13 @@ class DistractiveEnv(GridEngine):
             agent_pov=agentPOV,
         )
 
-    def _task(self) -> bool:
+    @override
+    def check_task(self) -> bool:
+        """Check whether the agent has reached the target at the end of the right corridor.
+
+        Returns
+        -------
+        bool
+            True if the agent is at the target position, False otherwise.
+        """
         return bool(np.all(self.objects.target.position == self.objects.agent.position))

@@ -1,5 +1,5 @@
-curiosity\_gym.core.gridengine.GridEngine.get\_wrapper\_attr
-============================================================
+GridEngine.get\_wrapper\_attr
+=============================
 
 .. currentmodule:: curiosity_gym.core.gridengine
 

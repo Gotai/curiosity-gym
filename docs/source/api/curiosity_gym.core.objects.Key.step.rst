@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Key.step
-====================================
+Key.step
+========
 
 .. currentmodule:: curiosity_gym.core.objects
 

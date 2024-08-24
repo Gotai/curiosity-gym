@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Ball.reset
-======================================
+Ball.reset
+==========
 
 .. currentmodule:: curiosity_gym.core.objects
 

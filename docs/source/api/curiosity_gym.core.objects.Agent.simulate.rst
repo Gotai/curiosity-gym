@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Agent.simulate
-==========================================
+Agent.simulate
+==============
 
 .. currentmodule:: curiosity_gym.core.objects
 

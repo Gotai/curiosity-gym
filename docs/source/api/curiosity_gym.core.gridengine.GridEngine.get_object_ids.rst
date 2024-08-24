@@ -1,5 +1,5 @@
-curiosity\_gym.core.gridengine.GridEngine.get\_object\_ids
-==========================================================
+GridEngine.get\_object\_ids
+===========================
 
 .. currentmodule:: curiosity_gym.core.gridengine
 

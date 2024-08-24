@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.SmallReward.get\_identity
-=====================================================
+SmallReward.get\_identity
+=========================
 
 .. currentmodule:: curiosity_gym.core.objects
 

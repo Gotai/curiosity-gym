@@ -71,5 +71,6 @@ class SparseEnv(GridEngine):
             agent_pov=agentPOV,
         )
 
-    def _task(self) -> bool:
+    @override
+    def check_task(self) -> bool:
         return bool(np.all(self.objects.target.position == self.objects.agent.position))

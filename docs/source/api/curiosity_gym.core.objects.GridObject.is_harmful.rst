@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.GridObject.is\_harmful
-==================================================
+GridObject.is\_harmful
+======================
 
 .. currentmodule:: curiosity_gym.core.objects
 

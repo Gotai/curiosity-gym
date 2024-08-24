@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.RandomBlock.get\_identity
-=====================================================
+RandomBlock.get\_identity
+=========================
 
 .. currentmodule:: curiosity_gym.core.objects
 

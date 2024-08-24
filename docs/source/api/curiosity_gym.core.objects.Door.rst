@@ -1,5 +1,5 @@
-﻿curiosity\_gym.core.objects.Door
-================================
+﻿Door
+====
 
 .. currentmodule:: curiosity_gym.core.objects
 

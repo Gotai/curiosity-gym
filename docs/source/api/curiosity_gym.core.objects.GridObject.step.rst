@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.GridObject.step
-===========================================
+GridObject.step
+===============
 
 .. currentmodule:: curiosity_gym.core.objects
 

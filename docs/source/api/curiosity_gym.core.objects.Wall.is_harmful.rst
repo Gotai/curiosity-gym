@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Wall.is\_harmful
-============================================
+Wall.is\_harmful
+================
 
 .. currentmodule:: curiosity_gym.core.objects
 

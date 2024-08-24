@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.RandomBlock.interact
-================================================
+RandomBlock.interact
+====================
 
 .. currentmodule:: curiosity_gym.core.objects
 

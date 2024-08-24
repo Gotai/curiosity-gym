@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.GridObject.simulate
-===============================================
+GridObject.simulate
+===================
 
 .. currentmodule:: curiosity_gym.core.objects
 

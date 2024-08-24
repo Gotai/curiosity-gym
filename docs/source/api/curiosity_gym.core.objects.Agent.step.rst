@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Agent.step
-======================================
+Agent.step
+==========
 
 .. currentmodule:: curiosity_gym.core.objects
 

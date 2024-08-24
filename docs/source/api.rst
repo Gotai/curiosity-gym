@@ -9,6 +9,10 @@ This page gives an overview of all modules, objects and functions included in Cu
 
 .. toctree::
     :maxdepth: 1
+    :titlesonly:
     
     gridobjects
     gridengine
+    api/curiosity_gym.core.gridengine.GridEngine
+    agentpov
+    envs

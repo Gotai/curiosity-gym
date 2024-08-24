@@ -1,5 +1,5 @@
-﻿curiosity\_gym.core.objects.Agent
-=================================
+﻿Agent
+=====
 
 .. currentmodule:: curiosity_gym.core.objects
 

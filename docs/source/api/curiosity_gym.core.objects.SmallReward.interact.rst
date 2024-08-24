@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.SmallReward.interact
-================================================
+SmallReward.interact
+====================
 
 .. currentmodule:: curiosity_gym.core.objects
 

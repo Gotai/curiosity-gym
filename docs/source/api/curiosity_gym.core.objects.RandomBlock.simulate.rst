@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.RandomBlock.simulate
-================================================
+RandomBlock.simulate
+====================
 
 .. currentmodule:: curiosity_gym.core.objects
 

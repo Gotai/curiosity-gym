@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Door.interact
-=========================================
+Door.interact
+=============
 
 .. currentmodule:: curiosity_gym.core.objects
 

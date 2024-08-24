@@ -18,14 +18,15 @@ class TestEngine(unittest.TestCase):
                              f"Expected {expected_pos}.")
 
     def test_maximum_steps(self) -> None:
-        """Maximum step count termination.
+        """Maximum step count truncation.
         
         Actions: Rotate right until maximum step count is reached.
-        Expected: Episode termination.
+        Expected: Episode truncation.
         """
         for a in [1] * env.env_settings.max_steps:
-            _, _, terminated, _, _ = env.step(a)
-        self.assertTrue(terminated, "Termination by reaching maximum step count failed.")
+            _, _, terminated, truncated, _ = env.step(a)
+        self.assertTrue(truncated, "Truncation by reaching maximum step count failed.")
+        self.assertFalse(terminated, "Termination by maximum step count. Should only truncate.")
 
     def test_grid_movement(self) -> None:
         """Movement dynamics.

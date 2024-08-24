@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Door.simulate
-=========================================
+Door.simulate
+=============
 
 .. currentmodule:: curiosity_gym.core.objects
 

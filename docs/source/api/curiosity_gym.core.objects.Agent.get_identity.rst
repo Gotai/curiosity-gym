@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Agent.get\_identity
-===============================================
+Agent.get\_identity
+===================
 
 .. currentmodule:: curiosity_gym.core.objects
 

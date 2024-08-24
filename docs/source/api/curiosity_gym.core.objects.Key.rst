@@ -1,5 +1,5 @@
-﻿curiosity\_gym.core.objects.Key
-===============================
+﻿Key
+===
 
 .. currentmodule:: curiosity_gym.core.objects
 

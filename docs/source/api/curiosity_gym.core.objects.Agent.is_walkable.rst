@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Agent.is\_walkable
-==============================================
+Agent.is\_walkable
+==================
 
 .. currentmodule:: curiosity_gym.core.objects
 

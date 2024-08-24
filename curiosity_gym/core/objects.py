@@ -73,7 +73,7 @@ class GridObject(ABC):
         """
 
     def get_identity(self) -> tuple[int|None,int,int]:
-        """Return a tuple that uniquely identifies the grid object.
+        """Return a tuple that identifies the grid object and its state in the enviroment.
 
         Returns
         -------

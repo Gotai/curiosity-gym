@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Ball.is\_walkable
-=============================================
+Ball.is\_walkable
+=================
 
 .. currentmodule:: curiosity_gym.core.objects
 

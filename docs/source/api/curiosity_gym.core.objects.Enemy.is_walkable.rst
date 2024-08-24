@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Enemy.is\_walkable
-==============================================
+Enemy.is\_walkable
+==================
 
 .. currentmodule:: curiosity_gym.core.objects
 

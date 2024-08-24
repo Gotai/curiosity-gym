@@ -1,5 +1,5 @@
-﻿curiosity\_gym.core.objects.RandomBlock
-=======================================
+﻿RandomBlock
+===========
 
 .. currentmodule:: curiosity_gym.core.objects
 

@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Ball.interact
-=========================================
+Ball.interact
+=============
 
 .. currentmodule:: curiosity_gym.core.objects
 

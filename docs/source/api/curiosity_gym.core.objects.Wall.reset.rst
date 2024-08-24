@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Wall.reset
-======================================
+Wall.reset
+==========
 
 .. currentmodule:: curiosity_gym.core.objects
 

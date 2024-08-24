@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Wall.render
-=======================================
+Wall.render
+===========
 
 .. currentmodule:: curiosity_gym.core.objects
 

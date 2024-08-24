@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Ball.get\_identity
-==============================================
+Ball.get\_identity
+==================
 
 .. currentmodule:: curiosity_gym.core.objects
 

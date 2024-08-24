@@ -1,5 +1,5 @@
-curiosity\_gym.core.gridengine.GridEngine.step
-==============================================
+GridEngine.step
+===============
 
 .. currentmodule:: curiosity_gym.core.gridengine
 

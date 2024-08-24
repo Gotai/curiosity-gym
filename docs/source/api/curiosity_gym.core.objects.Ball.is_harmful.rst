@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Ball.is\_harmful
-============================================
+Ball.is\_harmful
+================
 
 .. currentmodule:: curiosity_gym.core.objects
 

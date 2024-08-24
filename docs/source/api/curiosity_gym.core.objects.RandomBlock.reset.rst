@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.RandomBlock.reset
-=============================================
+RandomBlock.reset
+=================
 
 .. currentmodule:: curiosity_gym.core.objects
 

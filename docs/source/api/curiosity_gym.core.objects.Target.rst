@@ -1,5 +1,5 @@
-﻿curiosity\_gym.core.objects.Target
-==================================
+﻿Target
+======
 
 .. currentmodule:: curiosity_gym.core.objects
 

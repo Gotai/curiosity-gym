@@ -1,5 +1,5 @@
-﻿curiosity\_gym.core.gridengine.GridEngine
-=========================================
+﻿GridEngine
+==========
 
 .. currentmodule:: curiosity_gym.core.gridengine
 
@@ -15,6 +15,8 @@
       :toctree:
    
       
+      
+         ~GridEngine.check_task
       
          ~GridEngine.close
       

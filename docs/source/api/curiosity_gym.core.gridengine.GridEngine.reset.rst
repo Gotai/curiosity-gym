@@ -1,5 +1,5 @@
-curiosity\_gym.core.gridengine.GridEngine.reset
-===============================================
+GridEngine.reset
+================
 
 .. currentmodule:: curiosity_gym.core.gridengine
 

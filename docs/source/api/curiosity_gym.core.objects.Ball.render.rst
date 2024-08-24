@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Ball.render
-=======================================
+Ball.render
+===========
 
 .. currentmodule:: curiosity_gym.core.objects
 

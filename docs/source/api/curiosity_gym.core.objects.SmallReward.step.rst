@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.SmallReward.step
-============================================
+SmallReward.step
+================
 
 .. currentmodule:: curiosity_gym.core.objects
 

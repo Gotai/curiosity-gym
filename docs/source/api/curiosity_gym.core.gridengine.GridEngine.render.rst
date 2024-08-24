@@ -1,5 +1,5 @@
-curiosity\_gym.core.gridengine.GridEngine.render
-================================================
+GridEngine.render
+=================
 
 .. currentmodule:: curiosity_gym.core.gridengine
 

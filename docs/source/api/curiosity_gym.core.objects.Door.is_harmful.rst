@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Door.is\_harmful
-============================================
+Door.is\_harmful
+================
 
 .. currentmodule:: curiosity_gym.core.objects
 

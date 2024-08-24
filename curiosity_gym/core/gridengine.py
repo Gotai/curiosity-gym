@@ -1,7 +1,7 @@
 """Definitions for the curiosity-gym grid environment dynamics.
 
 This module defines the GridEngine class, which is the abstract
-base class for all curiosity-gym environments. It defines the
+base class for all curiosity-gym environments. It implements the
 grid-based dynamics for all environments and implements the 
 gymnasium api, which can be used to interact with RL algorithms. 
 """
@@ -66,21 +66,56 @@ class GridEngine(gym.Env, ABC):
             self.init_render()
 
     @abstractmethod
-    def _task(self) -> bool:
-        pass
+    def check_task(self) -> bool:
+        """Check whether the main task of an environment has been completed by the agent.\n
+        A specific task needs to be implemented by all environments that inherit
+        from :class:`GridEngine`. The completion of the task yields the maximum reward
+        and ends the current episode.
+
+        Returns
+        -------
+        bool
+            :const:`True` if main task was completed by the agent, :const:`False` otherwise.
+        """
 
     def step(self, action: int | Action) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+        """Run one timestep of the environment’s dynamics using the agent actions.\n
+        When the end of an episode is reached (terminated or truncated), it is necessary
+        to call :meth:`reset` to reset this environment’s state for the next episode.
+
+        Parameters
+        ----------
+        action : int | :type:`~curiosity_gym.utils.enums.Action`
+            Action selected by the RL agent.
+
+        Returns
+        -------
+        observation : np.ndarray
+            An element of the :attr:`observation_space` that represents the agents observation.
+        reward : float
+            The reward as a result of taking the specified action.
+        terminated : bool
+            End of episode by reaching a terminal state. Can be achieved by completing the task
+            of an environment or agent contact with a harmful grid object. If true, the user
+            needs to call :meth:`reset`.
+        truncated : bool
+            Typically, this is a timelimit, but could also be used to indicate an agent
+            physically going out of bounds. Can be used to end the episode prematurely before 
+            a terminal state is reached. If true, the user needs to call reset().
+        info : dict
+            Contains auxiliary diagnostic information for debugging, learning and logging.
+        """
         reward = 0
         for ob in self.objects.get_non_wall():
             reward += ob.step(
-                Action(action),
+                self.agent_pov.transform_action(action),
                 self.find_object(self.objects.agent.get_front()),
                 self._check_walkable(self.objects.agent.get_front()),
                 )
 
         self.step_count += 1
         reward += (self.env_settings.min_steps / self.step_count *
-                   self.env_settings.reward_range[1]) if self._task() else 0
+                   self.env_settings.reward_range[1]) if self.check_task() else 0
         obs = self._get_obs()
 
         if self.render_settings.render_mode == "human":
@@ -88,7 +123,7 @@ class GridEngine(gym.Env, ABC):
                                         f"Step reward: {reward}]")
             self._render_frame()
 
-        return obs, reward, self._get_terminated(), False, self._get_info()
+        return obs, reward, self._get_terminated(), self._get_truncated(), self._get_info()
 
     def reset(self, **kwargs) -> tuple[np.ndarray, dict]:
         super().reset(**kwargs)
@@ -107,10 +142,44 @@ class GridEngine(gym.Env, ABC):
             pygame.display.quit()
             pygame.quit()
 
+    def find_object(self, position: np.ndarray) -> objects.GridObject | None:
+        """Get non-wall grid object at given position.
+
+        Parameters
+        ----------
+        position : np.ndarray
+            Position where the object is located inside the environment.
+
+        Returns
+        -------
+        objects.GridObject | None
+            Gridobject if there is a non-wall gridobject at given position, None otherwise.
+        """
+        for ob in self.objects.get_non_wall():
+            if np.all(ob.position == position):
+                return ob
+        return None
+
     def get_object_ids(self) -> dict[objects.GridObject, int]:
+        """Get ids for all grid object types.
+
+        Returns
+        -------
+        dict[objects.GridObject, int]
+            Dictionary containing all grid object types with their corresponding ids in the
+            :attr:`observation_space`.
+        """
         return objects.GridObject.id_map
 
     def get_state(self) -> np.ndarray:
+        """Get the current state of the environment.\n
+        The returned state is independent of the agent's :attr:`observation_space`.
+
+        Returns
+        -------
+        state : np.ndarray
+            Current state of the environment.
+        """
         state = np.zeros([self.env_settings.width * self.env_settings.height, 3], dtype=int)
         for ob in self.objects.get_all():
             x,y = ob.position
@@ -121,6 +190,7 @@ class GridEngine(gym.Env, ABC):
         return state
 
     def init_render(self) -> None:
+        """Initialise render objects."""
         pygame.init()
         pygame.display.init()
         window_size = (self.render_settings.window_width, self.render_settings.window_height)
@@ -128,10 +198,40 @@ class GridEngine(gym.Env, ABC):
         self.render_settings.clock = pygame.time.Clock()
 
     def load_walls(self, positions: np.ndarray) -> np.ndarray:
+        """Convert array of positions to wall objects for environment.
+
+        Parameters
+        ----------
+        positions : np.ndarray
+            Array of positions, where wall objects shall be placed. Wall positions of standard
+            curiosity-gym environments are stored in :mod:`curiosity_gym.utils.constants`.
+
+        Returns
+        -------
+        np.ndarray
+            Array of wall objects.
+        """
         walls = [objects.Wall(position) for position in positions]
         return np.array(walls)
 
     def simulate(self, action: int | Action) -> np.ndarray:
+        """Simulate the state of the environment if a given action were taken.\n
+        Does not change the actual state of the environment.
+        
+        .. warning::
+            For most applications, it is not advisable to use this function for training RL agents,
+            as it allows direct access to the dynamics of the environment.
+
+        Parameters
+        ----------
+        action : int | :type:`~curiosity_gym.utils.enums.Action`
+            Action to simulate.
+
+        Returns
+        -------
+        np.ndarray
+            State of the environment after simulated action.
+        """
         state = np.zeros([self.env_settings.width * self.env_settings.height, 3])
         for ob in self.objects.get_all():
             ob_simulated = ob.simulate(
@@ -142,6 +242,12 @@ class GridEngine(gym.Env, ABC):
             x,y = ob_simulated.position
             state[x + y * self.env_settings.width] = ob_simulated.get_identity()
         return state
+
+    def _check_harmful(self, position: np.ndarray) -> bool:
+        for ob in self.objects.other:
+            if np.all(ob.position == position) and ob.is_harmful():
+                return True
+        return False
 
     def _check_walkable(self, position: np.ndarray) -> bool:
         inbounds_horizontal = 0 < position[0] < self.env_settings.width
@@ -155,18 +261,6 @@ class GridEngine(gym.Env, ABC):
                 return False
         return True
 
-    def _check_harmful(self, position: np.ndarray) -> bool:
-        for ob in self.objects.other:
-            if np.all(ob.position == position) and ob.is_harmful():
-                return True
-        return False
-
-    def find_object(self, position: np.ndarray) -> objects.GridObject | None:
-        for ob in self.objects.get_non_wall():
-            if np.all(ob.position == position):
-                return ob
-        return None
-
     def _get_info(self) -> dict[str, Any]:
         return {"Current Steps": self.step_count}
 
@@ -174,9 +268,10 @@ class GridEngine(gym.Env, ABC):
         return self.agent_pov.transform_obs(self.get_state(), self.objects.agent)
 
     def _get_terminated(self) -> bool:
-        return (self.step_count >= self.env_settings.max_steps
-        or self._check_harmful(self.objects.agent.position)
-        or self._task())
+        return (self._check_harmful(self.objects.agent.position) or self.check_task())
+
+    def _get_truncated(self) -> bool:
+        return self.step_count >= self.env_settings.max_steps
 
     def _init_pov(self, agent_pov: AgentPOV | str) -> AgentPOV:
         assert isinstance(agent_pov, (AgentPOV, str)), (

@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Key.simulate
-========================================
+Key.simulate
+============
 
 .. currentmodule:: curiosity_gym.core.objects
 

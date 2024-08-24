@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Door.is\_walkable
-=============================================
+Door.is\_walkable
+=================
 
 .. currentmodule:: curiosity_gym.core.objects
 

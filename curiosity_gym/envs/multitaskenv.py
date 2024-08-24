@@ -61,7 +61,8 @@ class MultitaskEnv(GridEngine):
             agent_pov=agentPOV,
         )
 
-    def _task(self) -> bool:
+    @override
+    def check_task(self) -> bool:
         if self.task % 2 == 1:
             return bool(np.all(self.objects.target.position == self.objects.agent.position))
         return bool(np.all(self.ball.position == self.ball_target.position))

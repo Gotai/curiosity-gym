@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Wall.simulate
-=========================================
+Wall.simulate
+=============
 
 .. currentmodule:: curiosity_gym.core.objects
 

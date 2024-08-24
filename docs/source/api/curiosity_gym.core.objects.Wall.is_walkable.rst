@@ -1,5 +1,5 @@
-curiosity\_gym.core.objects.Wall.is\_walkable
-=============================================
+Wall.is\_walkable
+=================
 
 .. currentmodule:: curiosity_gym.core.objects
 
