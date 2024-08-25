@@ -1,11 +1,13 @@
+"""Stores map layouts, color codes and a rotation mapping used in the grid environments."""
+
 import numpy as np
 
 
 ROTATION_TO_STATE = {
-    (1,0): 0,
-    (0,1): 1,
-    (-1,0): 2,
-    (0,-1): 3
+    (1,0): 0, # right
+    (0,1): 1, # up
+    (-1,0): 2, # left
+    (0,-1): 3, # down
 }
 
 STATE_TO_ROTATION = {

@@ -46,6 +46,7 @@ html_theme_options = {
         },
     ],
     'navigation_depth': 2,
+    'navbar_align': 'left',
 }
 
 print("conf.py done.")

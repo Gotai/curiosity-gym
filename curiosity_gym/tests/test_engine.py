@@ -1,3 +1,5 @@
+"""Definition of unit tests for the environment grid engine."""
+
 import unittest
 from typing import override
 
@@ -6,6 +8,7 @@ from curiosity_gym.envs.multitaskenv import MultitaskEnv
 env = MultitaskEnv(task=1)
 
 class TestEngine(unittest.TestCase):
+    """Unit tests for the grid engine, carried out in the curiosity-gym multitask environment."""
 
     @override
     def setUp(self) -> None:

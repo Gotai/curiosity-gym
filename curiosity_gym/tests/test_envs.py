@@ -1,3 +1,5 @@
+"""Definition of unit tests for the curiosity-gym grid environments."""
+
 import unittest
 from typing import override
 
@@ -15,6 +17,7 @@ env_multitask_2 = MultitaskEnv(task=2)
 
 
 class TestSparseEnv(unittest.TestCase):
+    """Unit tests for the curiosity-gym sparse reward environment."""
 
     @override
     def setUp(self) -> None:
@@ -86,6 +89,7 @@ class TestSparseEnv(unittest.TestCase):
 
 
 class TestDistractiveEnv(unittest.TestCase):
+    """Unit tests for the curiosity-gym distractive rewards environment."""
 
     @override
     def setUp(self) -> None:
@@ -140,6 +144,7 @@ class TestDistractiveEnv(unittest.TestCase):
 
 
 class TestMultitaskEnv1(unittest.TestCase):
+    """Unit tests for the curiosity-gym multitask environment, with task no. 1 being active."""
 
     @override
     def setUp(self) -> None:
@@ -176,6 +181,7 @@ class TestMultitaskEnv1(unittest.TestCase):
 
 
 class TestMultitaskEnv2(unittest.TestCase):
+    """Unit tests for the curiosity-gym multitask environment, with task no. 2 being active."""
 
     @override
     def setUp(self) -> None:

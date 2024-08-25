@@ -1,3 +1,5 @@
+"""Definition of unit tests for the agent pov classes."""
+
 import unittest
 from typing import override
 
@@ -15,6 +17,7 @@ envs = {
 }
 
 class TestPOVGlobal(unittest.TestCase):
+    """Unit tests for the *global* agent pov."""
 
     @override
     def setUp(self) -> None:
@@ -48,6 +51,7 @@ class TestPOVGlobal(unittest.TestCase):
 
 
 class TestPOVLocal(unittest.TestCase):
+    """Unit tests for the *local* agent pov."""
 
     @override
     def setUp(self) -> None:
@@ -91,6 +95,7 @@ class TestPOVLocal(unittest.TestCase):
 
 
 class TestPOVForward(unittest.TestCase):
+    """Unit tests for the *forward* agent pov."""
 
     @override
     def setUp(self) -> None:

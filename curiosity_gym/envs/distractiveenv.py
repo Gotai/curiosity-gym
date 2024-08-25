@@ -12,7 +12,7 @@ from curiosity_gym.utils.dataclasses import EnvironmentSettings, RenderSettings,
 
 
 class DistractiveEnv(GridEngine):
-    """Defines the structure of the distractive rewards environment.\n
+    """Defines the structure of the curiosity-gym distractive rewards environment.\n
     It consists of two corridors. The left corridor contains small but frequent
     rewards, while the right corridor contains a larger but sparse reward. The
     environment is designed to test the agent's capability of escaping local reward
@@ -38,7 +38,7 @@ class DistractiveEnv(GridEngine):
         :width: 600
         :align: center
         
-        Example of DistractiveEnv with optimal policy.
+        Example of a DistractiveEnv episode with an optimal policy.
     """
 
     @override

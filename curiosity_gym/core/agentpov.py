@@ -189,7 +189,7 @@ class LocalView(AgentPOV):
                 ix_new = self.radius + x + (self.radius * 2 + 1) * (self.radius + y)
                 cell = (pos[0] + x, pos[1] + y)
 
-                if ix < 0 or not self.is_visible(state, pos.tolist(), cell):
+                if ix < 0 or not self.is_visible(state, pos, cell):
                     continue
 
                 self.visible_positions.append(cell)

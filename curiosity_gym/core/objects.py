@@ -29,8 +29,8 @@ class GridObject(ABC):
     ----------
     position : tuple[int,int]
         Position in the grid where the object will be placed. Values must be in range
-        (:attr:`~curiosity_gym.core.gridengine.env_settings.width` - 1, 
-        :attr:`~curiosity_gym.core.gridengine.env_settings.height` - 1).
+        (:attr:`~curiosity_gym.utils.dataclasses.EnvironmentSettings.width` - 1, 
+        :attr:`~curiosity_gym.utils.dataclasses.EnvironmentSettings.height` - 1).
     color : int
         Color of the grid object. Values must be in range(0,10). 
         Color mappings are defined in :const:`~curiosity_gym.utils.constants.IX_TO_COLOR`.
@@ -181,7 +181,7 @@ class GridObject(ABC):
 class Agent(GridObject):
     """Grid object representing the RL agent. \n
     The color of the agent grid object cannot be specified at initialisation, as it is
-    used to represent collected :class:`~Key` objects. The agent color will always be 
+    used to represent collected :class:`~Key` objects. The agent's color will always be 
     initialised as 1 (orange).
     
     Parameters
@@ -392,7 +392,7 @@ class Door(GridObject):
 
 
 class Key(GridObject):
-    """Collectable grid object that is used to unlock doors of the same color."""
+    """Collectable grid object that is used to unlock :class:`Door` objects of the same color."""
 
     @override
     def interact(self, agent: Agent) -> None:
@@ -470,7 +470,7 @@ class RandomBlock(GridObject):
 
 class Enemy(GridObject):
     """Moving grid object harmful to the agent. \n
-    Is used to introduce additional reward sparcity by early episode termination.
+    Can be used to introduce additional reward sparcity by early episode termination.
 
     Parameters
     ----------
@@ -582,7 +582,7 @@ class Enemy(GridObject):
 
 
 class SmallReward(GridObject):
-    """Grid object yielding a small reward when agent moves over it.
+    """Grid object yielding a small reward when the agent moves over it.
 
     Parameters
     ----------

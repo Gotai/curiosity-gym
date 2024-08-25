@@ -1,3 +1,5 @@
+"""Definition of the curiosity-gym sparse reward environment."""
+
 from typing import override
 
 import numpy as np
@@ -10,7 +12,35 @@ from curiosity_gym.utils.dataclasses import EnvironmentSettings, RenderSettings,
 
 
 class SparseEnv(GridEngine):
-    """Placeholder"""
+    """Defines the structure of the curiosity-gym sparse reward environment.\n
+    The environment consists of five rooms connected by four locked
+    :class:`~curiosity_gym.core.objects.Door` objects. It also contains multiple
+    :class:`~curiosity_gym.core.objects.Enemy` s and a 
+    :class:`~curiosity_gym.core.objects.RandomBlock`. The environment represents
+    a classic navigation task, where the agent needs to reach the green target
+    cell. It is designed to test the agent's ability to learn in sparse reward 
+    settings, where random exploration mechanisms are often insufficient.
+    
+    Parameters
+    ----------
+    agentPOV : :class:`~curiosity_gym.core.agentpov.AgentPOV` | str, optional
+        Object or string defining the observations and action spaces of the RL agent.
+        Valid string values are *'global'*, *'local_W'* and *'forward_L_W'*, where 
+        *W* and *L* are integers defining the width and length of the respective POV.
+        By default :class:`~curiosity_gym.core.agentpov.GlobalView`.
+    render_mode : str | None, optional
+        Render mode in which the environment is run. If render mode is *human*, the 
+        environment will be rendered in PyGame. By default None.
+    window_width : int, optional
+        Horizontal size of the PyGame window in *human* render mode. By default 1200.
+    
+
+    .. figure:: ../../source/images/SparseEnv_optimal.gif
+        :width: 500
+        :align: center
+        
+        Example of a SparseEnv episode with an optimal policy.  
+    """
 
     @override
     def __init__(
@@ -73,4 +103,11 @@ class SparseEnv(GridEngine):
 
     @override
     def check_task(self) -> bool:
+        """Check whether the agent has reached the green target cell.
+
+        Returns
+        -------
+        bool
+            True if the agent is at the target position, False otherwise.
+        """
         return bool(np.all(self.objects.target.position == self.objects.agent.position))
