@@ -35,23 +35,20 @@ class AgentPOV(ABC):
     observation_space : gymnasium.spaces.MultiDiscrete
         The observation space defining the structure of the observations being returned
         by a grid environment.
-    width : int
-        Number of horizontal cells in the grid environment where the pov class is used.
-    height : int
-        Number of vertical cells in the grid environment where the pov class is used.
+    env_size : tuple[int, int]
+        Number of (horizontal, vertical) cells in the grid environment where the pov class is used.
     """
 
     def __init__(
             self,
             action_space: spaces.Discrete,
             observation_space: spaces.MultiDiscrete,
-            width: int,
-            height: int,
+            env_size: tuple[int, int]
         ) -> None:
         self.action_space = action_space
         self.observation_space = observation_space
-        self.width = width
-        self.height = height
+        self.width = env_size[0]
+        self.height = env_size[1]
         self.visible_positions = []
 
     @abstractmethod
@@ -132,18 +129,16 @@ class GlobalView(AgentPOV):
 
     Parameters
     ----------
-    width : int
-        Number of horizontal cells in the grid environment where the pov class is used.
-    height : int
-        Number of vertical cells in the grid environment where the pov class is used.
+    env_size : tuple[int, int]
+        Number of (horizontal, vertical) cells in the grid environment where the pov class is used.
     """
 
     @override
-    def __init__(self, width: int, height: int) -> None:
+    def __init__(self, env_size: tuple[int,int]) -> None:
         action_space = spaces.Discrete(4)
-        number_of_nodes = width * height
+        number_of_nodes = env_size[0] * env_size[1]
         observation_space = spaces.MultiDiscrete(np.full((number_of_nodes,3), 10, dtype=int))
-        super().__init__(action_space, observation_space, width, height)
+        super().__init__(action_space, observation_space, env_size)
 
     @override
     def transform_obs(self, state: np.ndarray, agent: objects.Agent) -> np.ndarray:
@@ -157,10 +152,10 @@ class LocalView(AgentPOV):
     ----------
     radius : int
         Number of cells around the agent to be part of the observation.
-    width : int
-        Number of horizontal cells in the grid environment where the pov class is used.
-    height : int
-        Number of vertical cells in the grid environment where the pov class is used.
+    env_size : tuple[int, int]
+        Number of (horizontal, vertical) cells in the grid environment where the pov class is used.
+    xray : bool
+        Whether the agent can observe cells behind walls and closed doors.
 
     
     .. figure:: ../../source/images/LocalView_2.gif
@@ -171,12 +166,13 @@ class LocalView(AgentPOV):
     """
 
     @override
-    def __init__(self, radius: int, width: int, height: int) -> None:
+    def __init__(self, radius: int, env_size: tuple[int,int], xray: bool = False) -> None:
         self.radius = radius
+        self.xray = xray
         action_space = spaces.Discrete(4)
         number_of_cells = (self.radius * 2 + 1)**2
         observation_space = spaces.MultiDiscrete(np.full((number_of_cells,3), 10, dtype=int))
-        super().__init__(action_space, observation_space, width, height)
+        super().__init__(action_space, observation_space, env_size)
 
     @override
     def transform_obs(self, state: np.ndarray, agent: objects.Agent) -> np.ndarray:
@@ -189,7 +185,7 @@ class LocalView(AgentPOV):
                 ix_new = self.radius + x + (self.radius * 2 + 1) * (self.radius + y)
                 cell = (pos[0] + x, pos[1] + y)
 
-                if ix < 0 or not self.is_visible(state, pos, cell):
+                if ix < 0 or (not self.is_visible(state, pos, cell) and not self.xray):
                     continue
 
                 self.visible_positions.append(cell)
@@ -206,10 +202,10 @@ class ForwardView(AgentPOV):
         Length of the visible field in front of the agent.
     pov_width : int
         Width of the visible field in front of the agent.
-    env_width : int
-        Number of horizontal cells in the grid environment where the pov class is used.
-    env_height : int
-        Number of vertical cells in the grid environment where the pov class is used.
+    env_size : tuple[int, int]
+        Number of (horizontal, vertical) cells in the grid environment where the pov class is used.
+    xray : bool
+        Whether the agent can observe cells behind walls and closed doors.
 
     
     .. figure:: ../../source/images/ForwardView_2_3.gif
@@ -220,13 +216,20 @@ class ForwardView(AgentPOV):
     """
 
     @override
-    def __init__(self, pov_length: int, pov_width: int, env_width: int, env_height: int) -> None:
+    def __init__(
+        self,
+        pov_length: int,
+        pov_width: int,
+        env_size: tuple[int,int],
+        xray: bool = False,
+        ) -> None:
         self.pov_width = pov_width
         self.pov_length = pov_length
+        self.xray = xray
         action_space = spaces.Discrete(4)
         number_of_cells = (pov_length + 1) * pov_width
         observation_space = spaces.MultiDiscrete(np.full((number_of_cells,3), 10, dtype=int))
-        super().__init__(action_space, observation_space, env_width, env_height)
+        super().__init__(action_space, observation_space, env_size)
 
     @override
     def transform_obs(self, state: np.ndarray, agent: objects.Agent) -> np.ndarray:
@@ -253,7 +256,7 @@ class ForwardView(AgentPOV):
                 ix = (pos[0] + x) + self.width * (pos[1] + y)
                 cell = (pos[0] + x, pos[1] + y)
 
-                if ix < 0 or not self.is_visible(state, pos, cell):
+                if ix < 0 or not self.is_visible(state, pos, cell) and not self.xray:
                     continue
 
                 self.visible_positions.append(cell)

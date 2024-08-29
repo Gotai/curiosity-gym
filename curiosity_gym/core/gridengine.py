@@ -280,18 +280,29 @@ class GridEngine(gym.Env, ABC):
         if isinstance(agent_pov, AgentPOV):
             return agent_pov
 
+        # Construct pov by string
+        xray = False
         if agent_pov.lower() == "global":
-            return GlobalView(self.env_settings.width, self.env_settings.height)
+            return GlobalView((self.env_settings.width, self.env_settings.height))
 
         if agent_pov.lower().startswith("local_"):
             radius = agent_pov[6:]
+
+            if radius.lower().startswith("xray_"):
+                xray = True
+                radius = radius[5:]
+
             assert radius.isnumeric() and int(radius) >= 0, \
                   f"Invalid radius for local pov: {radius}"
-            return LocalView(int(radius), self.env_settings.width, self.env_settings.height)
+            return LocalView(int(radius), (self.env_settings.width, self.env_settings.height), xray)
 
         if agent_pov.lower().startswith("forward_"):
             pov_width = 1
             pov_length = agent_pov[8:]
+
+            if pov_length.lower().startswith("xray_"):
+                xray = True
+                pov_length = pov_length[5:]
             if "_" in pov_length:
                 pov_length, pov_width = pov_length.split("_")
             assert str(pov_length).isnumeric() and int(pov_length) >= 0, \
@@ -301,7 +312,7 @@ class GridEngine(gym.Env, ABC):
             assert int(pov_width) % 2 == 1, \
                 f"Invalid width {pov_width} for pov. Width must be odd."
             return ForwardView(int(pov_length), int(pov_width),
-                               self.env_settings.width, self.env_settings.height)
+                               (self.env_settings.width, self.env_settings.height), xray)
 
         raise ValueError(f"Invalid agent pov: {agent_pov}.")
 
