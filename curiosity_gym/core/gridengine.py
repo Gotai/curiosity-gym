@@ -51,17 +51,26 @@ class GridEngine(gym.Env, ABC):
         self.env_settings = env_settings
         self.render_settings = render_settings
         self.reward_range = env_settings.reward_range
+        """Range of rewards that can be obtained within one episode."""
 
         # Initialise agent pov
         self.agent_pov = self._init_pov(agent_pov)
         self.action_space = self.agent_pov.action_space
+        """Space of possible actions a RL agent can choose from."""
         self.observation_space = self.agent_pov.observation_space
+        """Space of possible observations returned by the environment."""
 
         # Current environment state
         self.objects = env_objects
         self.step_count = 0
 
         # Initialise render objects
+        self.metadata = {"render_modes": [None, "human", "rgb_array"]}
+        """Metadata of the environment. Contains possible render modes."""
+        self.render_mode = render_settings.render_mode
+        """Render mode in which the environment is run."""
+        assert self.render_mode in self.metadata["render_modes"], \
+            f"Invalid render_mode: {self.render_mode}"
         if self.render_settings.render_mode == "human":
             self.init_render()
 
@@ -82,6 +91,11 @@ class GridEngine(gym.Env, ABC):
         """Run one timestep of the environment’s dynamics using the agent actions.\n
         When the end of an episode is reached (terminated or truncated), it is necessary
         to call :meth:`reset` to reset this environment’s state for the next episode.
+
+        .. seealso:: 
+            The method is part of the `Gymnasium 
+            <https://gymnasium.farama.org/api/env/#gymnasium.Env.step>`__
+            environment api.
 
         Parameters
         ----------
@@ -126,6 +140,20 @@ class GridEngine(gym.Env, ABC):
         return obs, reward, self._get_terminated(), self._get_truncated(), self._get_info()
 
     def reset(self, **kwargs) -> tuple[np.ndarray, dict]:
+        """Reset the environment to an initial internal state.\n
+        
+        .. seealso:: 
+            The method calls the parent method from the `Gymnasium 
+            <https://gymnasium.farama.org/api/env/#gymnasium.Env.reset>`__
+            environment class.
+
+        Returns
+        -------
+        observation : np.ndarray
+            Observation of the initial state.
+        info : dict
+            Auxiliary information about the internal state.
+        """
         super().reset(**kwargs)
         for ob in list(self.objects.other) + [self.objects.agent, self.objects.target]:
             ob.reset()
@@ -133,11 +161,43 @@ class GridEngine(gym.Env, ABC):
         return (self._get_obs(), self._get_info())
 
     def render(self) -> np.ndarray | None:
+        """Compute the render frames as specified by 
+        :attr:`~curiosity_gym.utils.dataclasses.RenderSettings.render_mode`.
+
+        By convention, if the :attr:`~curiosity_gym.utils.dataclasses.RenderSettings.render_mode` 
+        is:
+
+        * None (default): no render is computed.
+        * “human”: The environment is continuously rendered in the current PyGame display. This \
+            rendering occurs during step() and render() doesn’t need to be called. Returns None.
+        * “rgb_array”: Return a single frame representing the current state of the environment.\
+            A frame is a np.ndarray with shape (x, y, 3) representing RGB values for an x-by-y \
+            pixel image.
+
+        .. seealso:: 
+            The method is part of the `Gymnasium 
+            <https://gymnasium.farama.org/api/env/#gymnasium.Env.render>`__
+            environment api.
+
+        Returns
+        -------
+        np.ndarray | None
+            A frame for render_mode = “rgb_array”, None otherwise.
+        """
         if self.render_settings.render_mode == "rgb_array":
             return self._render_frame()
         return None
 
     def close(self) -> None:
+        """Clean up the environment.\n
+        Will close the rendering window. Calling close on an already closed
+        environment has no effect and won’t raise an error.
+
+        .. seealso:: 
+            The method is part of the `Gymnasium 
+            <https://gymnasium.farama.org/api/env/#gymnasium.Env.close>`__
+            environment api.
+        """
         if self.render_settings.window is not None:
             pygame.display.quit()
             pygame.quit()

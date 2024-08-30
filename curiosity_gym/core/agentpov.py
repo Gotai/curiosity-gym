@@ -162,7 +162,7 @@ class LocalView(AgentPOV):
         :width: 500
         :align: center
         
-        Example of LocalView with a radius of 2.
+        Example of LocalView with a radius of 2 without xray.
     """
 
     @override
@@ -212,7 +212,7 @@ class ForwardView(AgentPOV):
         :width: 500
         :align: center
         
-        Example of ForwardView with a length of 2 and a width of 3.
+        Example of ForwardView with a length of 2 and a width of 3 without xray.
     """
 
     @override

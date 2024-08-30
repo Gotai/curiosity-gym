@@ -1,6 +1,7 @@
 Environments
 ------------
 .. currentmodule:: curiosity_gym.core
+
 The Curiosity Gym package provides multiple Gymnasium-based grid environments to test and benchmark
 curiosity-driven RL algorithms. The dynamics of the grid are implemented in the abstract base class
 :class:`~gridengine.GridEngine`. A concrete environment can be created by inheriting these dynamics and
@@ -29,3 +30,4 @@ Environment types
     ~distractiveenv.DistractiveEnv
     ~multitaskenv.MultitaskEnv
     ~sparseenv.SparseEnv
+

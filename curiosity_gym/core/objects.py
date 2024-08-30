@@ -41,8 +41,10 @@ class GridObject(ABC):
 
     # Class-level attributes
     identifier = None
-    _next_id = 1
+    """Unique id number for each subclass."""
     id_map = {}
+    """Dictionary for all ids and their corresponding subclasses."""
+    _next_id = 1
 
     def __init__(self, position: tuple[int,int], color: int = 0, state: int = 0) -> None:
         self.start_position = np.array(position)
