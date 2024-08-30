@@ -46,6 +46,10 @@ html_theme_options = {
     ],
     'navigation_depth': 2,
     'navbar_align': 'left',
+    'logo': {
+        'image_light': 'images/curiosity_logo_black.png',
+        'image_dark': 'images/curiosity_logo_white.png',
+    }
 }
 
 print("conf.py done.")
