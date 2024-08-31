@@ -34,7 +34,8 @@ exclude_patterns = []
 
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
-html_title = 'Curiosity Gym'
+html_title = 'CuriosityGym'
+html_favicon = 'images/curiosity_icon.ico'
 html_theme_options = {
     "icon_links": [
         {
