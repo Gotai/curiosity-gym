@@ -25,12 +25,12 @@ class AgentPOV(ABC):
     """Abstract agent point-of-view class. \n
     Implements the processing of inputs going into a grid environment (actions)
     and outputs coming out of a grid environment (observations). The :meth:`transform_obs`
-    method has to be implemented by inheriting pov classes. 
+    method has to be implemented by inheriting pov classes.
 
     Parameters
     ----------
     action_space : gymnasium.spaces.Discrete
-        The action space defining what actions can be taken by an RL agent within a grid 
+        The action space defining what actions can be taken by an RL agent within a grid
         environment.
     observation_space : gymnasium.spaces.MultiDiscrete
         The observation space defining the structure of the observations being returned
@@ -40,11 +40,11 @@ class AgentPOV(ABC):
     """
 
     def __init__(
-            self,
-            action_space: spaces.Discrete,
-            observation_space: spaces.MultiDiscrete,
-            env_size: tuple[int, int]
-        ) -> None:
+        self,
+        action_space: spaces.Discrete,
+        observation_space: spaces.MultiDiscrete,
+        env_size: tuple[int, int],
+    ) -> None:
         self.action_space = action_space
         self.observation_space = observation_space
         self.width = env_size[0]
@@ -86,11 +86,11 @@ class AgentPOV(ABC):
         return Action(action)
 
     def is_visible(
-            self,
-            state: np.ndarray,
-            pos_agent: tuple[int,int],
-            pos_cell: tuple[int,int],
-        ) -> bool:
+        self,
+        state: np.ndarray,
+        pos_agent: tuple[int, int],
+        pos_cell: tuple[int, int],
+    ) -> bool:
         """Check if grid cell at given position is visible by the agent. \n
         A grid cell is visible if there is no wall or closed door between the agent and the cell.
 
@@ -114,9 +114,11 @@ class AgentPOV(ABC):
         x, y = pos_agent[0] + dx, pos_agent[1] + dy
 
         while (x, y) != (pos_cell[0], pos_cell[1]):
-            if state[x + y * self.width][0] == objects.Wall.identifier or \
-                state[x + y * self.width][0] == objects.Door.identifier and \
-                state[x + y * self.width][2] == 2:
+            if (
+                state[x + y * self.width][0] == objects.Wall.identifier
+                or state[x + y * self.width][0] == objects.Door.identifier
+                and state[x + y * self.width][2] == 2
+            ):
                 return False
 
             x += dx if x != pos_cell[0] else 0
@@ -134,10 +136,12 @@ class GlobalView(AgentPOV):
     """
 
     @override
-    def __init__(self, env_size: tuple[int,int]) -> None:
+    def __init__(self, env_size: tuple[int, int]) -> None:
         action_space = spaces.Discrete(4)
         number_of_nodes = env_size[0] * env_size[1]
-        observation_space = spaces.MultiDiscrete(np.full((number_of_nodes,3), 10, dtype=int))
+        observation_space = spaces.MultiDiscrete(
+            np.full((number_of_nodes, 3), 10, dtype=int)
+        )
         super().__init__(action_space, observation_space, env_size)
 
     @override
@@ -157,28 +161,32 @@ class LocalView(AgentPOV):
     xray : bool
         Whether the agent can observe cells behind walls and closed doors.
 
-    
+
     .. figure:: ../../source/images/LocalView_2.gif
         :width: 500
         :align: center
-        
+
         Example of LocalView with a radius of 2 without xray.
     """
 
     @override
-    def __init__(self, radius: int, env_size: tuple[int,int], xray: bool = False) -> None:
+    def __init__(
+        self, radius: int, env_size: tuple[int, int], xray: bool = False
+    ) -> None:
         self.radius = radius
         self.xray = xray
         action_space = spaces.Discrete(4)
-        number_of_cells = (self.radius * 2 + 1)**2
-        observation_space = spaces.MultiDiscrete(np.full((number_of_cells,3), 10, dtype=int))
+        number_of_cells = (self.radius * 2 + 1) ** 2
+        observation_space = spaces.MultiDiscrete(
+            np.full((number_of_cells, 3), 10, dtype=int)
+        )
         super().__init__(action_space, observation_space, env_size)
 
     @override
     def transform_obs(self, state: np.ndarray, agent: objects.Agent) -> np.ndarray:
         self.visible_positions = []
         pos = agent.position.tolist()
-        local = np.full(((self.radius * 2 + 1)**2,3), [0,0,0])
+        local = np.full(((self.radius * 2 + 1) ** 2, 3), [0, 0, 0])
         for x in range(-self.radius, self.radius + 1):
             for y in range(-self.radius, self.radius + 1):
                 ix = (pos[0] + x) + self.width * (pos[1] + y)
@@ -207,11 +215,11 @@ class ForwardView(AgentPOV):
     xray : bool
         Whether the agent can observe cells behind walls and closed doors.
 
-    
+
     .. figure:: ../../source/images/ForwardView_2_3.gif
         :width: 500
         :align: center
-        
+
         Example of ForwardView with a length of 2 and a width of 3 without xray.
     """
 
@@ -220,30 +228,34 @@ class ForwardView(AgentPOV):
         self,
         pov_length: int,
         pov_width: int,
-        env_size: tuple[int,int],
+        env_size: tuple[int, int],
         xray: bool = False,
-        ) -> None:
+    ) -> None:
         self.pov_width = pov_width
         self.pov_length = pov_length
         self.xray = xray
         action_space = spaces.Discrete(4)
         number_of_cells = (pov_length + 1) * pov_width
-        observation_space = spaces.MultiDiscrete(np.full((number_of_cells,3), 10, dtype=int))
+        observation_space = spaces.MultiDiscrete(
+            np.full((number_of_cells, 3), 10, dtype=int)
+        )
         super().__init__(action_space, observation_space, env_size)
 
     @override
     def transform_obs(self, state: np.ndarray, agent: objects.Agent) -> np.ndarray:
         self.visible_positions = []
         pos = agent.position.tolist()
-        local = np.full(((self.pov_length + 1) * self.pov_width,3), [0,0,0])
+        local = np.full(((self.pov_length + 1) * self.pov_width, 3), [0, 0, 0])
 
         if agent.state % 3 == 0:
             length_range = range(0, self.pov_length + 1)
-            width_range = range(-int(self.pov_width/2), int(self.pov_width/2) + 1)
+            width_range = range(-int(self.pov_width / 2), int(self.pov_width / 2) + 1)
 
         else:
             length_range = range(0, -self.pov_length - 1, -1)
-            width_range = range(int(self.pov_width/2), -int(self.pov_width/2) - 1, -1)
+            width_range = range(
+                int(self.pov_width / 2), -int(self.pov_width / 2) - 1, -1
+            )
 
         ix_new = 0
         for l in length_range:

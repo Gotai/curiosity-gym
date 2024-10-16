@@ -28,6 +28,8 @@
       
          ~SparseEnv.get_wrapper_attr
       
+         ~SparseEnv.has_wrapper_attr
+      
          ~SparseEnv.init_render
       
          ~SparseEnv.load_walls
@@ -35,6 +37,8 @@
          ~SparseEnv.render
       
          ~SparseEnv.reset
+      
+         ~SparseEnv.set_wrapper_attr
       
          ~SparseEnv.simulate
       
@@ -51,10 +55,11 @@
    
       ~SparseEnv.metadata
       ~SparseEnv.np_random
+      ~SparseEnv.np_random_seed
       ~SparseEnv.render_mode
-      ~SparseEnv.reward_range
       ~SparseEnv.spec
       ~SparseEnv.unwrapped
+      ~SparseEnv.reward_range
       ~SparseEnv.action_space
       ~SparseEnv.observation_space
    

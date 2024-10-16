@@ -16,7 +16,11 @@ import pygame
 from curiosity_gym.core import objects
 from curiosity_gym.core.agentpov import AgentPOV, GlobalView, LocalView, ForwardView
 from curiosity_gym.utils.enums import Action
-from curiosity_gym.utils.dataclasses import EnvironmentSettings, RenderSettings, EnvironmentObjects
+from curiosity_gym.utils.dataclasses import (
+    EnvironmentSettings,
+    RenderSettings,
+    EnvironmentObjects,
+)
 
 
 class GridEngine(gym.Env, ABC):
@@ -33,7 +37,7 @@ class GridEngine(gym.Env, ABC):
         Object storing all grid objects that were placed in the environment.
     agent_pov : :class:`~curiosity_gym.core.agentpov.AgentPOV` | str
         Object or string defining the observations and action spaces of the RL agent.
-        Valid string values are *'global'*, *'local_W'* and *'forward_L_W'*, where 
+        Valid string values are *'global'*, *'local_W'* and *'forward_L_W'*, where
         W and L are integers defining the width and length of the respective POV.
     """
 
@@ -69,8 +73,9 @@ class GridEngine(gym.Env, ABC):
         """Metadata of the environment. Contains possible render modes."""
         self.render_mode = render_settings.render_mode
         """Render mode in which the environment is run."""
-        assert self.render_mode in self.metadata["render_modes"], \
-            f"Invalid render_mode: {self.render_mode}"
+        assert (
+            self.render_mode in self.metadata["render_modes"]
+        ), f"Invalid render_mode: {self.render_mode}"
         if self.render_settings.render_mode == "human":
             self.init_render()
 
@@ -87,13 +92,15 @@ class GridEngine(gym.Env, ABC):
             :const:`True` if main task was completed by the agent, :const:`False` otherwise.
         """
 
-    def step(self, action: int | Action) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+    def step(
+        self, action: int | Action
+    ) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
         """Run one timestep of the environment’s dynamics using the agent actions.\n
         When the end of an episode is reached (terminated or truncated), it is necessary
         to call :meth:`reset` to reset this environment’s state for the next episode.
 
-        .. seealso:: 
-            The method is part of the `Gymnasium 
+        .. seealso::
+            The method is part of the `Gymnasium
             <https://gymnasium.farama.org/api/env/#gymnasium.Env.step>`__
             environment api.
 
@@ -114,7 +121,7 @@ class GridEngine(gym.Env, ABC):
             needs to call :meth:`reset`.
         truncated : bool
             Typically, this is a timelimit, but could also be used to indicate an agent
-            physically going out of bounds. Can be used to end the episode prematurely before 
+            physically going out of bounds. Can be used to end the episode prematurely before
             a terminal state is reached. If true, the user needs to call reset().
         info : dict
             Contains auxiliary diagnostic information for debugging, learning and logging.
@@ -125,25 +132,40 @@ class GridEngine(gym.Env, ABC):
                 self.agent_pov.transform_action(action),
                 self.find_object(self.objects.agent.get_front()),
                 self._check_walkable(self.objects.agent.get_front()),
-                )
+            )
 
         self.step_count += 1
-        reward += (self.env_settings.min_steps / self.step_count *
-                   self.env_settings.reward_range[1]) if self.check_task() else 0
+        reward += (
+            (
+                self.env_settings.min_steps
+                / self.step_count
+                * self.env_settings.reward_range[1]
+            )
+            if self.check_task()
+            else 0
+        )
         obs = self._get_obs()
 
         if self.render_settings.render_mode == "human":
-            pygame.display.set_caption(f"Curiosity Gym [Current Steps: {self.step_count}, " +
-                                        f"Step reward: {reward}]")
+            pygame.display.set_caption(
+                f"Curiosity Gym [Current Steps: {self.step_count}, "
+                + f"Step reward: {reward}]"
+            )
             self._render_frame()
 
-        return obs, reward, self._get_terminated(), self._get_truncated(), self._get_info()
+        return (
+            obs,
+            reward,
+            self._get_terminated(),
+            self._get_truncated(),
+            self._get_info(),
+        )
 
     def reset(self, **kwargs) -> tuple[np.ndarray, dict]:
         """Reset the environment to an initial internal state.\n
-        
-        .. seealso:: 
-            The method calls the parent method from the `Gymnasium 
+
+        .. seealso::
+            The method calls the parent method from the `Gymnasium
             <https://gymnasium.farama.org/api/env/#gymnasium.Env.reset>`__
             environment class.
 
@@ -193,8 +215,8 @@ class GridEngine(gym.Env, ABC):
         Will close the rendering window. Calling close on an already closed
         environment has no effect and won’t raise an error.
 
-        .. seealso:: 
-            The method is part of the `Gymnasium 
+        .. seealso::
+            The method is part of the `Gymnasium
             <https://gymnasium.farama.org/api/env/#gymnasium.Env.close>`__
             environment api.
         """
@@ -240,11 +262,14 @@ class GridEngine(gym.Env, ABC):
         state : np.ndarray
             Current state of the environment.
         """
-        state = np.zeros([self.env_settings.width * self.env_settings.height, 3], dtype=int)
+        state = np.zeros(
+            [self.env_settings.width * self.env_settings.height, 3], dtype=int
+        )
         for ob in self.objects.get_all():
-            x,y = ob.position
-            assert x + y * self.env_settings.width < len(state), \
-            f"""Position [{x},{y}] of object with type {self.get_object_ids()[ob.id]}
+            x, y = ob.position
+            assert x + y * self.env_settings.width < len(
+                state
+            ), f"""Position [{x},{y}] of object with type {self.get_object_ids()[ob.id]}
             is invalid for grid with size ({self.env_settings.width}, {self.env_settings.height})"""
             state[x + y * self.env_settings.width] = ob.get_identity()
         return state
@@ -253,7 +278,10 @@ class GridEngine(gym.Env, ABC):
         """Initialise render objects."""
         pygame.init()
         pygame.display.init()
-        window_size = (self.render_settings.window_width, self.render_settings.window_height)
+        window_size = (
+            self.render_settings.window_width,
+            self.render_settings.window_height,
+        )
         self.render_settings.window = pygame.display.set_mode(window_size)
         self.render_settings.clock = pygame.time.Clock()
 
@@ -277,7 +305,7 @@ class GridEngine(gym.Env, ABC):
     def simulate(self, action: int | Action) -> np.ndarray:
         """Simulate the state of the environment if a given action were taken.\n
         Does not change the actual state of the environment.
-        
+
         .. warning::
             For most applications, it is not advisable to use this function for training RL agents,
             as it allows direct access to the dynamics of the environment.
@@ -297,9 +325,9 @@ class GridEngine(gym.Env, ABC):
             ob_simulated = ob.simulate(
                 Action(action),
                 self.find_object(self.objects.agent.get_front()),
-                self._check_walkable(self.objects.agent.get_front())
-                )
-            x,y = ob_simulated.position
+                self._check_walkable(self.objects.agent.get_front()),
+            )
+            x, y = ob_simulated.position
             state[x + y * self.env_settings.width] = ob_simulated.get_identity()
         return state
 
@@ -328,14 +356,15 @@ class GridEngine(gym.Env, ABC):
         return self.agent_pov.transform_obs(self.get_state(), self.objects.agent)
 
     def _get_terminated(self) -> bool:
-        return (self._check_harmful(self.objects.agent.position) or self.check_task())
+        return self._check_harmful(self.objects.agent.position) or self.check_task()
 
     def _get_truncated(self) -> bool:
         return self.step_count >= self.env_settings.max_steps
 
     def _init_pov(self, agent_pov: AgentPOV | str) -> AgentPOV:
-        assert isinstance(agent_pov, (AgentPOV, str)), (
-            f"Invalid type of agent_pov: {type(agent_pov)}")
+        assert isinstance(
+            agent_pov, (AgentPOV, str)
+        ), f"Invalid type of agent_pov: {type(agent_pov)}"
 
         if isinstance(agent_pov, AgentPOV):
             return agent_pov
@@ -352,9 +381,12 @@ class GridEngine(gym.Env, ABC):
                 xray = True
                 radius = radius[5:]
 
-            assert radius.isnumeric() and int(radius) >= 0, \
-                  f"Invalid radius for local pov: {radius}"
-            return LocalView(int(radius), (self.env_settings.width, self.env_settings.height), xray)
+            assert (
+                radius.isnumeric() and int(radius) >= 0
+            ), f"Invalid radius for local pov: {radius}"
+            return LocalView(
+                int(radius), (self.env_settings.width, self.env_settings.height), xray
+            )
 
         if agent_pov.lower().startswith("forward_"):
             pov_width = 1
@@ -365,20 +397,30 @@ class GridEngine(gym.Env, ABC):
                 pov_length = pov_length[5:]
             if "_" in pov_length:
                 pov_length, pov_width = pov_length.split("_")
-            assert str(pov_length).isnumeric() and int(pov_length) >= 0, \
-                f"Invalid length for forward pov: {pov_length}."
-            assert str(pov_width).isnumeric() and int(pov_width) >= 0, \
-                f"Invalid width for forward pov: {pov_width}."
-            assert int(pov_width) % 2 == 1, \
-                f"Invalid width {pov_width} for pov. Width must be odd."
-            return ForwardView(int(pov_length), int(pov_width),
-                               (self.env_settings.width, self.env_settings.height), xray)
+            assert (
+                str(pov_length).isnumeric() and int(pov_length) >= 0
+            ), f"Invalid length for forward pov: {pov_length}."
+            assert (
+                str(pov_width).isnumeric() and int(pov_width) >= 0
+            ), f"Invalid width for forward pov: {pov_width}."
+            assert (
+                int(pov_width) % 2 == 1
+            ), f"Invalid width {pov_width} for pov. Width must be odd."
+            return ForwardView(
+                int(pov_length),
+                int(pov_width),
+                (self.env_settings.width, self.env_settings.height),
+                xray,
+            )
 
         raise ValueError(f"Invalid agent pov: {agent_pov}.")
 
     def _render_frame(self) -> np.ndarray | None:
         # Define canvas for new Frame
-        window_size = (self.render_settings.window_width, self.render_settings.window_height)
+        window_size = (
+            self.render_settings.window_width,
+            self.render_settings.window_height,
+        )
         canvas = pygame.Surface(window_size)
         canvas.fill((255, 255, 255))
 
@@ -410,7 +452,7 @@ class GridEngine(gym.Env, ABC):
         for pos in self.agent_pov.visible_positions:
             overlay = pygame.Surface((tilesize, tilesize))
             overlay.set_alpha(30)
-            overlay.fill((255,153,20))
+            overlay.fill((255, 153, 20))
             canvas.blit(overlay, (pos[0] * tilesize, pos[1] * tilesize))
 
         # Display canvas in window
@@ -425,5 +467,6 @@ class GridEngine(gym.Env, ABC):
         # Return for rgb_array
         elif self.render_settings.render_mode == "rgb_array":
             return np.transpose(
-                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2))
+                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
+            )
         return None

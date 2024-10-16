@@ -28,6 +28,8 @@
       
          ~DistractiveEnv.get_wrapper_attr
       
+         ~DistractiveEnv.has_wrapper_attr
+      
          ~DistractiveEnv.init_render
       
          ~DistractiveEnv.load_walls
@@ -35,6 +37,8 @@
          ~DistractiveEnv.render
       
          ~DistractiveEnv.reset
+      
+         ~DistractiveEnv.set_wrapper_attr
       
          ~DistractiveEnv.simulate
       
@@ -51,10 +55,11 @@
    
       ~DistractiveEnv.metadata
       ~DistractiveEnv.np_random
+      ~DistractiveEnv.np_random_seed
       ~DistractiveEnv.render_mode
-      ~DistractiveEnv.reward_range
       ~DistractiveEnv.spec
       ~DistractiveEnv.unwrapped
+      ~DistractiveEnv.reward_range
       ~DistractiveEnv.action_space
       ~DistractiveEnv.observation_space
    

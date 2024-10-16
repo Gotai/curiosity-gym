@@ -11,7 +11,7 @@ from curiosity_gym.core import objects
 @dataclass
 class EnvironmentSettings:
     """Stores settings about the size and step count of an environment.
-    
+
     Parameters
     ----------
     min_steps : int
@@ -25,11 +25,12 @@ class EnvironmentSettings:
     reward_range : tuple[int,int]
         Range of total rewards within an episode.
     """
+
     min_steps: int
     max_steps: int = 50
     width: int = 10
     height: int = 10
-    reward_range: tuple[int,int] = (0,1)
+    reward_range: tuple[int, int] = (0, 1)
 
 
 @dataclass
@@ -39,7 +40,7 @@ class RenderSettings:
     Parameters
     ----------
     render_mode : str | None
-        Render mode in which the environment is run. If render mode is *human*, the 
+        Render mode in which the environment is run. If render mode is *human*, the
         environment will be rendered in PyGame. By default None.
     render_fps : int
         Number of frames per second at which the PyGame rendering operates. By default 4.
@@ -52,6 +53,7 @@ class RenderSettings:
     clock: pygame.time.Clock | None
         PyGame clock object used in *human* render mode. By default None.
     """
+
     render_mode: str | None = None
     render_fps: int = 4
     window_width: int = 512
@@ -75,10 +77,13 @@ class EnvironmentObjects:
     other : np.ndarray
         List of all other grid objects placed in an environment.
     """
+
     agent: objects.Agent
     target: objects.Target
-    walls: np.ndarray = field(default_factory = lambda: np.empty(0, dtype = objects.Wall))
-    other: np.ndarray = field(default_factory = lambda: np.empty(0, dtype = objects.GridObject))
+    walls: np.ndarray = field(default_factory=lambda: np.empty(0, dtype=objects.Wall))
+    other: np.ndarray = field(
+        default_factory=lambda: np.empty(0, dtype=objects.GridObject)
+    )
 
     def get_all(self) -> np.ndarray:
         """Returns all stored grid objects.
@@ -98,4 +103,6 @@ class EnvironmentObjects:
         np.ndarray
             Numpy array containing all stored grid objects, except wall objects.
         """
-        return np.concatenate((np.array([self.target]), self.other, np.array([self.agent])))
+        return np.concatenate(
+            (np.array([self.target]), self.other, np.array([self.agent]))
+        )
