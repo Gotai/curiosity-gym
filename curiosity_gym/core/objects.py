@@ -63,7 +63,7 @@ class GridObject(ABC):
         GridObject._next_id += 1
 
     @abstractmethod
-    def render(self, canvas: pygame.Surface, pixelsquare: float):
+    def render(self, canvas: pygame.Surface, pixelsquare: float) -> None:
         """Render grid object in PyGame. \n
         Must be implemented by each grid object type to allow visual recognition
         in *human* rendering mode.
@@ -96,7 +96,7 @@ class GridObject(ABC):
             Agent object performing the interaction.
         """
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset attributes of the grid object to their starting values. \n
         Sets :attr:`~position`, :attr:`~state` and :attr:`~color` to their respective values
         assigned when the object was initialised.
@@ -546,9 +546,10 @@ class Enemy(GridObject):
         float
             Returns 0.
         """
-        self.position = self.position + STATE_TO_ROTATION[self.state] * np.array(
-            [1, -1]
-        )
+        if self.reach > 0:
+            self.position = self.position + STATE_TO_ROTATION[self.state] * np.array(
+                [1, -1]
+            )
         if (
             self.position[self.state % 2]
             == self.start_position[self.state % 2] + self.reach
