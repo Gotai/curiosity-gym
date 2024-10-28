@@ -10,8 +10,12 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import gymnasium as gym
+import matplotlib.pyplot as plt
 import numpy as np
 import pygame
+import pandas as pd
+import seaborn as sns
+
 
 from curiosity_gym.core import objects
 from curiosity_gym.core.agentpov import AgentPOV, GlobalView, LocalView, ForwardView
@@ -67,6 +71,11 @@ class GridEngine(gym.Env, ABC):
         # Current environment state
         self.objects = env_objects
         self.step_count = 0
+        self.pos_count = {
+            (x, y): 0
+            for x in range(self.env_settings.width)
+            for y in range(self.env_settings.height)
+        }
 
         # Initialise render objects
         self.metadata = {"render_modes": [None, "human", "rgb_array"]}
@@ -135,6 +144,8 @@ class GridEngine(gym.Env, ABC):
             )
 
         self.step_count += 1
+        self.pos_count[tuple(self.objects.agent.position)] += 1
+
         reward += (
             (
                 self.env_settings.min_steps
@@ -180,6 +191,7 @@ class GridEngine(gym.Env, ABC):
         for ob in list(self.objects.other) + [self.objects.agent, self.objects.target]:
             ob.reset()
         self.step_count = 0
+        self.pos_count[tuple(self.objects.agent.position)] += 1
         return (self._get_obs(), self._get_info())
 
     def render(self) -> np.ndarray | None:
@@ -273,6 +285,20 @@ class GridEngine(gym.Env, ABC):
             is invalid for grid with size ({self.env_settings.width}, {self.env_settings.height})"""
             state[x + y * self.env_settings.width] = ob.get_identity()
         return state
+
+    def heatmap(self) -> None:
+        """Display heatmap of position counts of the agent."""
+        max_col = max(key[0] for key in self.pos_count.keys())
+        max_row = max(key[1] for key in self.pos_count.keys())
+        data = pd.DataFrame(0, index=range(max_row + 1), columns=range(max_col + 1))
+
+        for (col, row), value in self.pos_count.items():
+            if value == 0:
+                value = None
+            data.iat[row, col] = value
+
+        plt.figure(figsize=(self.env_settings.width, self.env_settings.height))
+        sns.heatmap(data, cbar=True, cmap="Greens")
 
     def init_render(self) -> None:
         """Initialise render objects."""
