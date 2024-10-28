@@ -10,3 +10,4 @@ old/
 build/
 curiosity_gym.egg-info
 showenv.py
+curiosity_gym/testing.ipynb
