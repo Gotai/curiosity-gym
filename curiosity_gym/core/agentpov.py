@@ -42,7 +42,7 @@ class AgentPOV(ABC):
     def __init__(
         self,
         action_space: spaces.Discrete,
-        observation_space: spaces.MultiDiscrete,
+        observation_space: spaces.Box,
         env_size: tuple[int, int],
     ) -> None:
         self.action_space = action_space
@@ -139,8 +139,8 @@ class GlobalView(AgentPOV):
     def __init__(self, env_size: tuple[int, int]) -> None:
         action_space = spaces.Discrete(4)
         number_of_nodes = env_size[0] * env_size[1]
-        observation_space = spaces.MultiDiscrete(
-            np.full((number_of_nodes, 3), 10, dtype=int)
+        observation_space = spaces.Box(
+            shape=(number_of_nodes, 3), high=10, low=0, dtype=np.int64
         )
         super().__init__(action_space, observation_space, env_size)
 
@@ -177,8 +177,8 @@ class LocalView(AgentPOV):
         self.xray = xray
         action_space = spaces.Discrete(4)
         number_of_cells = (self.radius * 2 + 1) ** 2
-        observation_space = spaces.MultiDiscrete(
-            np.full((number_of_cells, 3), 10, dtype=int)
+        observation_space = spaces.Box(
+            shape=(number_of_cells, 3), high=10, low=0, dtype=np.int64
         )
         super().__init__(action_space, observation_space, env_size)
 
@@ -236,8 +236,8 @@ class ForwardView(AgentPOV):
         self.xray = xray
         action_space = spaces.Discrete(4)
         number_of_cells = (pov_length + 1) * pov_width
-        observation_space = spaces.MultiDiscrete(
-            np.full((number_of_cells, 3), 10, dtype=int)
+        observation_space = spaces.Box(
+            shape=(number_of_cells, 3), high=10, low=0, dtype=np.int64
         )
         super().__init__(action_space, observation_space, env_size)
 
