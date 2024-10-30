@@ -78,12 +78,12 @@ class GridEngine(gym.Env, ABC):
         }
 
         # Initialise render objects
-        self.metadata = {"render_modes": [None, "human", "rgb_array"]}
-        """Metadata of the environment. Contains possible render modes."""
+        self.metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+        """Metadata of the environment. Contains possible render modes and render fps."""
         self.render_mode = render_settings.render_mode
         """Render mode in which the environment is run."""
-        assert (
-            self.render_mode in self.metadata["render_modes"]
+        assert self.render_mode in (
+            self.metadata["render_modes"] + [None]
         ), f"Invalid render_mode: {self.render_mode}"
         if self.render_settings.render_mode == "human":
             self.init_render()

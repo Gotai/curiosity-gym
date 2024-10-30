@@ -56,7 +56,7 @@ class SparseEnv(GridEngine):
 
         env_settings = EnvironmentSettings(
             min_steps=66,
-            max_steps=100,
+            max_steps=500,
             width=15,
             height=11,
             reward_range=(0, 1),

@@ -11,3 +11,5 @@ build/
 curiosity_gym.egg-info
 showenv.py
 curiosity_gym/testing.ipynb
+experiments/train_models.ipynb
+curiosity_gym/dev_testing.ipynb

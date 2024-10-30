@@ -67,13 +67,13 @@ class MultitaskEnv(GridEngine):
         window_width: int = 1200,
     ) -> None:
 
-        assert task <= 4, f"Invalid task id: {task}."
+        assert task <= 2, f"Invalid task id: {task}."
         self.task = task
         self.random = random
 
         env_settings = EnvironmentSettings(
             min_steps=15,
-            max_steps=50,
+            max_steps=500,
             width=19,
             height=7,
             reward_range=(0, 1),
@@ -129,7 +129,7 @@ class MultitaskEnv(GridEngine):
 
     @override
     def reset(self, **kwargs) -> tuple[np.ndarray, dict]:
-        super().reset()
+        super().reset(**kwargs)
         if self.random:
             self.objects.target.position = np.random.randint(1, 6, 2)
             self.ball_target.position = np.array(
