@@ -3,6 +3,8 @@
 import unittest
 from typing import override
 
+from gymnasium.utils.env_checker import check_env
+
 from curiosity_gym.envs.multitaskenv import MultitaskEnv
 
 env = MultitaskEnv(task=1)
@@ -74,3 +76,10 @@ class TestEngine(unittest.TestCase):
             obs_step.tolist(),
             "Simulation is not equal to actual observation.",
         )
+
+    def test_gymnasium_api(self) -> None:
+        """Gymnasium API implementation."""
+        try:
+            check_env(env)
+        except AssertionError:
+            self.fail("Environment is not compliant with gymnasium API.")
