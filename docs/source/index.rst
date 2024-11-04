@@ -16,4 +16,6 @@ Contents
 
 .. toctree::
 
+   gettingstarted
+   userguide
    api

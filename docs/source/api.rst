@@ -4,10 +4,10 @@
 API reference
 =============
 
-:Release: 0.2
+:Release: 1.0
 :Date: |today|
 
-Welcome to the API Reference for Curiosity Gym, a Gymnasium-based Python package designed for curiosity-driven reinforcement learning.
+Welcome to the API Reference for Curiosity Gym, a Gymnasium-based Python package designed to develop, evaluate, and compare curiosity-driven reinforcement learning algorithms.
 This section provides a comprehensive overview of the modules, classes, methods and environments available in the package.
 
 Python API

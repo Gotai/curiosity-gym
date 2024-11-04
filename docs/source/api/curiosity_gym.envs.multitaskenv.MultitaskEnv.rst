@@ -28,7 +28,7 @@
       
          ~MultitaskEnv.get_wrapper_attr
       
-         ~MultitaskEnv.has_wrapper_attr
+         ~MultitaskEnv.heatmap
       
          ~MultitaskEnv.init_render
       
@@ -37,8 +37,6 @@
          ~MultitaskEnv.render
       
          ~MultitaskEnv.reset
-      
-         ~MultitaskEnv.set_wrapper_attr
       
          ~MultitaskEnv.simulate
       
@@ -55,11 +53,10 @@
    
       ~MultitaskEnv.metadata
       ~MultitaskEnv.np_random
-      ~MultitaskEnv.np_random_seed
       ~MultitaskEnv.render_mode
+      ~MultitaskEnv.reward_range
       ~MultitaskEnv.spec
       ~MultitaskEnv.unwrapped
-      ~MultitaskEnv.reward_range
       ~MultitaskEnv.action_space
       ~MultitaskEnv.observation_space
    

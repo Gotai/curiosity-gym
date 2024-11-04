@@ -28,7 +28,7 @@
       
          ~GridEngine.get_wrapper_attr
       
-         ~GridEngine.has_wrapper_attr
+         ~GridEngine.heatmap
       
          ~GridEngine.init_render
       
@@ -37,8 +37,6 @@
          ~GridEngine.render
       
          ~GridEngine.reset
-      
-         ~GridEngine.set_wrapper_attr
       
          ~GridEngine.simulate
       
@@ -55,11 +53,10 @@
    
       ~GridEngine.metadata
       ~GridEngine.np_random
-      ~GridEngine.np_random_seed
       ~GridEngine.render_mode
+      ~GridEngine.reward_range
       ~GridEngine.spec
       ~GridEngine.unwrapped
-      ~GridEngine.reward_range
       ~GridEngine.action_space
       ~GridEngine.observation_space
    
