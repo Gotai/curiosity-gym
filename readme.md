@@ -2,7 +2,7 @@
     <img src="docs/source/images/curiosity_logo_white.png" width="500px"/>
 </p>
 <p align="center">
-    <img src="docs/source/images/SparseEnv_optimal_local.gif" width="550px"/>
+    <img src="docs/source/images/SparseEnv_optimal_local.gif" width="475px"/>
 </p>
 Curiosity Gym is a unified Python framework designed to develop, evaluate, and compare curiosity-driven reinforcement learning algorithms. The framework provides three predefined [Gymnasium](https://github.com/Farama-Foundation/Gymnasium) environments, each of which has been designed to address a specific goal of curiosity-driven approaches. In addition to its
 focus on the distinctive characteristics of curiosity-driven RL, Curiosity Gym
