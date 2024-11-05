@@ -1,6 +1,6 @@
 asttokens==2.4.1
 cloudpickle==3.1.0
-curiosity_gym @ https://github.com/chrisreimann/curiosity-gym
+curiosity_gym @ https://github.com/chrisreimann/curiosity-gym@144daed003cd1cffbc85e2954a85192008aa27e9
 colorama==0.4.6
 comm==0.2.2
 contourpy==1.3.0
