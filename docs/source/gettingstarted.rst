@@ -27,6 +27,7 @@ To use the predefined environments from the Curiosity Gym framework, simply impo
 
     # Use Gymnasium API
     observation, info = env.reset()
+    action = env.action_space.sample()
     observation, reward, terminated, truncated, info = env.step(action)
     env.close()
 
