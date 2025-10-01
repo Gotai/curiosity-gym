@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import pygame
 
-from curiosity_gym.core import objects
+from curiosity_gym.core.objects import GridObject, Wall, Agent, Target
 
 
 @dataclass
@@ -78,11 +78,11 @@ class EnvironmentObjects:
         List of all other grid objects placed in an environment.
     """
 
-    agent: objects.Agent
-    target: objects.Target
-    walls: np.ndarray = field(default_factory=lambda: np.empty(0, dtype=objects.Wall))
+    agent: Agent
+    target: Target
+    walls: np.ndarray = field(default_factory=lambda: np.empty(0, dtype=Wall))
     other: np.ndarray = field(
-        default_factory=lambda: np.empty(0, dtype=objects.GridObject)
+        default_factory=lambda: np.empty(0, dtype=GridObject)
     )
 
     def get_all(self) -> np.ndarray:

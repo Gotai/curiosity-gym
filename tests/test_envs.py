@@ -5,7 +5,7 @@ from typing import override
 
 import numpy as np
 
-from curiosity_gym.core import objects
+from curiosity_gym.core.objects import Door, Enemy, SmallReward, Ball 
 from curiosity_gym.envs.sparseenv import SparseEnv
 from curiosity_gym.envs.distractiveenv import DistractiveEnv
 from curiosity_gym.envs.multitaskenv import MultitaskEnv
@@ -20,7 +20,6 @@ env_sparse = SparseEnv()
 env_distractive = DistractiveEnv()
 env_multitask_1 = MultitaskEnv(task=1)
 env_multitask_2 = MultitaskEnv(task=2)
-
 
 class TestSparseEnv(unittest.TestCase):
     """Unit tests for the curiosity-gym sparse reward environment."""
@@ -48,7 +47,7 @@ class TestSparseEnv(unittest.TestCase):
             env_sparse.step(a)
         door = env_sparse.find_object(np.array([9, 2]))
         assert isinstance(
-            door, objects.Door
+            door, Door
         ), "Door not found at position [9,2] in SparseEnv."
         self._assert_position(self.agent.position.tolist(), [8, 2])
         self.assertEqual(
@@ -67,7 +66,7 @@ class TestSparseEnv(unittest.TestCase):
             env_sparse.step(a)
         door = env_sparse.find_object(np.array([9, 2]))
         assert isinstance(
-            door, objects.Door
+            door, Door
         ), "Door not found at position [9,2] in SparseEnv."
         self._assert_position(self.agent.position.tolist(), [10, 2])
         self.assertEqual(
@@ -86,7 +85,7 @@ class TestSparseEnv(unittest.TestCase):
         for a in ACTIONS_ENEMY:
             _, _, terminated, _, _ = env_sparse.step(a)
         assert isinstance(
-            enemy, objects.Enemy
+            enemy, Enemy
         ), "Enemy not found at position [10,9] in SparseEnv."
         self.assertListEqual(
             enemy.position.tolist(),
@@ -133,7 +132,7 @@ class TestDistractiveEnv(unittest.TestCase):
         for a in [1, 0, 0, 2, 0, 0, 0, 0, 1, 0]:
             _, reward, terminated, _, _ = env_distractive.step(a)
         assert isinstance(
-            small_reward, objects.SmallReward
+            small_reward, SmallReward
         ), "Small reward was not found at position [8,5] in DistractiveEnv."
         self.assertListEqual(
             small_reward.position.tolist(),
@@ -249,7 +248,7 @@ class TestMultitaskEnv2(unittest.TestCase):
         for a in [1, 0, 0, 3, 0, 0]:
             env_multitask_2.step(a)
         assert isinstance(
-            ball, objects.Ball
+            ball, Ball
         ), "Ball not found at position [12,3] in MultitaskEnv."
         self.assertListEqual(
             ball.position.tolist(),
@@ -273,7 +272,7 @@ class TestMultitaskEnv2(unittest.TestCase):
         for a in [1, 0, 0, 3, 0, 3, 0, 3]:
             _, reward, terminated, _, _ = env_multitask_2.step(a)
         assert isinstance(
-            ball, objects.Ball
+            ball, Ball
         ), "Ball not found at position [12,3] in MultitaskEnv."
         self.assertListEqual(
             ball.position.tolist(),

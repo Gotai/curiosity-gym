@@ -16,16 +16,14 @@ import pygame
 import pandas as pd
 import seaborn as sns
 
-
-from curiosity_gym.core import objects
-from curiosity_gym.core.agentpov import AgentPOV, GlobalView, LocalView, ForwardView
+from curiosity_gym.core.objects import GridObject, Wall
+from curiosity_gym.core.pov import AgentPOV, GlobalView, LocalView, ForwardView
 from curiosity_gym.utils.enums import Action
 from curiosity_gym.utils.dataclasses import (
     EnvironmentSettings,
     RenderSettings,
     EnvironmentObjects,
 )
-
 
 class GridEngine(gym.Env, ABC):
     """Abstract grid-based environment class that implements the gymnasium api.
@@ -236,7 +234,7 @@ class GridEngine(gym.Env, ABC):
             pygame.display.quit()
             pygame.quit()
 
-    def find_object(self, position: np.ndarray) -> objects.GridObject | None:
+    def find_object(self, position: np.ndarray) -> GridObject | None:
         """Get non-wall grid object at given position.
 
         Parameters
@@ -254,7 +252,7 @@ class GridEngine(gym.Env, ABC):
                 return ob
         return None
 
-    def get_object_ids(self) -> dict[objects.GridObject, int]:
+    def get_object_ids(self) -> dict[GridObject, int]:
         """Get ids for all grid object types.
 
         Returns
@@ -263,7 +261,7 @@ class GridEngine(gym.Env, ABC):
             Dictionary containing all grid object types with their corresponding ids in the
             :attr:`observation_space`.
         """
-        return objects.GridObject.id_map
+        return GridObject.id_map
 
     def get_state(self) -> np.ndarray:
         """Get the current state of the environment.\n
@@ -325,7 +323,7 @@ class GridEngine(gym.Env, ABC):
         np.ndarray
             Array of wall objects.
         """
-        walls = [objects.Wall(position) for position in positions]
+        walls = [Wall(position) for position in positions]
         return np.array(walls)
 
     def simulate(self, action: int | Action) -> np.ndarray:

@@ -5,7 +5,7 @@ from typing import override
 
 import numpy as np
 
-from curiosity_gym.core import objects
+from curiosity_gym.core.objects import Agent, Ball, Target 
 from curiosity_gym.envs.multitaskenv import MultitaskEnv
 
 envs = {
@@ -15,7 +15,6 @@ envs = {
     "forward_2_1": MultitaskEnv(agentPOV="forward_2_1"),
     "forward_4_3": MultitaskEnv(agentPOV="forward_4_3"),
 }
-
 
 class TestPOVGlobal(unittest.TestCase):
     """Unit tests for the *global* agent pov."""
@@ -156,13 +155,13 @@ class TestPOVForward(unittest.TestCase):
         observation, _, _, _, _ = self.env_2_1.step(0)
         self.assertEqual(
             observation[0][0],
-            objects.Agent.identifier,
+            Agent.identifier,
             "Agent is not at expected index of observations for pov 'forward_2_1'.",
         )
         observation, _, _, _, _ = self.env_4_3.step(0)
         self.assertEqual(
             observation[1][0],
-            objects.Agent.identifier,
+            Agent.identifier,
             "Agent is not at expected index of observations for pov 'forward_4_3'.",
         )
 
@@ -176,7 +175,7 @@ class TestPOVForward(unittest.TestCase):
             observation, _, _, _, _ = self.env_4_3.step(a)
         self.assertNotEqual(
             observation[10][0],
-            objects.Target.identifier,
+            Target.identifier,
             "Agent can see target through wall in multitask environment.",
         )
 
@@ -189,6 +188,6 @@ class TestPOVForward(unittest.TestCase):
         observation, _, _, _, _ = self.env_4_3.step(1)
         self.assertEqual(
             observation[10][0],
-            objects.Ball.identifier,
+            Ball.identifier,
             "Agent can not see ball for pov 'forward_4_3' in multitask environment.",
         )

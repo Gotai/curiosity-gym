@@ -4,8 +4,8 @@ from typing import override
 
 import numpy as np
 
-from curiosity_gym.core import objects
-from curiosity_gym.core.agentpov import AgentPOV
+from curiosity_gym.core.objects import Target, Ball, Door, Agent, Key 
+from curiosity_gym.core.pov import AgentPOV
 from curiosity_gym.core.gridengine import GridEngine
 from curiosity_gym.utils.constants import MAP_MULTITASK
 from curiosity_gym.utils.dataclasses import (
@@ -87,20 +87,20 @@ class MultitaskEnv(GridEngine):
             ),
         )
 
-        self.ball_target = objects.Target((15, 3), color=5)
-        self.ball = objects.Ball((12, 3), zone_low=(13, 1), zone_high=(17, 5), color=5)
+        self.ball_target = Target((15, 3), color=5)
+        self.ball = Ball((12, 3), zone_low=(13, 1), zone_high=(17, 5), color=5)
         other_objects = np.array(
             [
-                objects.Door((6, 3), color=3, state=2),
-                objects.Key((7, 1), color=3),
+                Door((6, 3), color=3, state=2),
+                Key((7, 1), color=3),
                 self.ball_target,
                 self.ball,
             ]
         )
 
         env_objects = EnvironmentObjects(
-            agent=objects.Agent((9, 3), state=1),
-            target=objects.Target((3, 3), color=2),
+            agent=Agent((9, 3), state=1),
+            target=Target((3, 3), color=2),
             walls=self.load_walls(MAP_MULTITASK),
             other=other_objects,
         )

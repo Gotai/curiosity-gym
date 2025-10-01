@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
+authors = [{name = "Chris Reimann"}, {name = "Fabian Kvas"}, {name = "Fatih Özgan"}]
 dependencies = [
     "asttokens==2.4.1",
     "cloudpickle==3.1.0",
@@ -60,3 +61,18 @@ dependencies = [
     "tzdata==2024.2",
     "wcwidth==0.2.13",
 ]
+
+[build-system]
+requires = ["uv_build >= 0.8.17, <0.9.0"]
+build-backend = "uv_build"
+
+[project.urls]
+Documentation = "https://curiosity-gym.readthedocs.io/"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.13.2",
+]
+
+[tool.setuptools.packages.find]
+wherer = ["src"]

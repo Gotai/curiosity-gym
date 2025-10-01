@@ -1,13 +1,13 @@
-"""Definition of the curiosity-gym distractive rewards environment."""
+"""Definition of the curiosity-gym sparse reward environment."""
 
 from typing import override
 
 import numpy as np
 
-from curiosity_gym.core import objects
-from curiosity_gym.core.agentpov import AgentPOV
+from curiosity_gym.core.objects import Key, Door, Enemy, RandomBlock, Agent, Target 
+from curiosity_gym.core.pov import AgentPOV
 from curiosity_gym.core.gridengine import GridEngine
-from curiosity_gym.utils.constants import MAP_DISTRACTIVE
+from curiosity_gym.utils.constants import MAP_SPARSE
 from curiosity_gym.utils.dataclasses import (
     EnvironmentSettings,
     RenderSettings,
@@ -15,14 +15,15 @@ from curiosity_gym.utils.dataclasses import (
 )
 
 
-class DistractiveEnv(GridEngine):
-    """Defines the structure of the curiosity-gym distractive rewards environment.\n
-    It consists of two corridors. The left corridor contains small but frequent
-    rewards, while the right corridor contains a larger but sparse reward. The
-    environment is designed to test the agent's capability of escaping local reward
-    optima (represented by the left corridor) to find a global sparse optimum
-    (represented by the right corridor). The maximum step count is set to 50, so
-    that the agent can not obtain rewards from both corridors within one episode.
+class SparseEnv(GridEngine):
+    """Defines the structure of the curiosity-gym sparse reward environment.\n
+    The environment consists of five rooms connected by four locked
+    :class:`~curiosity_gym.core.objects.Door` objects. It also contains multiple
+    :class:`~curiosity_gym.core.objects.Enemy` s and a
+    :class:`~curiosity_gym.core.objects.RandomBlock`. The environment represents
+    a classic navigation task, where the agent needs to reach the green target
+    cell. It is designed to test the agent's ability to learn in sparse reward
+    settings, where random exploration mechanisms are often insufficient.
 
     Parameters
     ----------
@@ -38,11 +39,11 @@ class DistractiveEnv(GridEngine):
         Horizontal size of the PyGame window in *human* render mode. By default 1200.
 
 
-    .. figure:: ../../source/images/DistractiveEnv_optimal.gif
-        :width: 600
+    .. figure:: ../../source/images/SparseEnv_optimal.gif
+        :width: 500
         :align: center
 
-        Example of a DistractiveEnv episode with an optimal policy.
+        Example of a SparseEnv episode with an optimal policy.
     """
 
     @override
@@ -50,14 +51,14 @@ class DistractiveEnv(GridEngine):
         self,
         agentPOV: AgentPOV | str = "global",
         render_mode: str | None = None,
-        window_width: int = 1200,
+        window_width: int = 800,
     ) -> None:
 
         env_settings = EnvironmentSettings(
-            min_steps=40,
-            max_steps=50,
-            width=23,
-            height=7,
+            min_steps=66,
+            max_steps=500,
+            width=15,
+            height=11,
             reward_range=(0, 1),
         )
 
@@ -71,18 +72,29 @@ class DistractiveEnv(GridEngine):
 
         other_objects = np.array(
             [
-                objects.SmallReward((8, 5), reward=0.1),
-                objects.SmallReward((6, 1), reward=0.1),
-                objects.SmallReward((4, 5), reward=0.1),
-                objects.SmallReward((2, 1), reward=0.1),
-                objects.SmallReward((1, 5), reward=0.1),
+                # Room 1:
+                Key((5, 2), color=3),
+                Door((9, 2), state=2, color=3),
+                # Room 2:
+                Key((13, 1), color=4),
+                Door((12, 4), state=2, color=4),
+                # Room 3:
+                Key((11, 8), color=5),
+                Door((8, 6), state=2, color=5),
+                Enemy((10, 9), state=1, reach=4),
+                # Room 4:
+                Key((5, 6), color=6),
+                Door((4, 8), state=2, color=6),
+                RandomBlock((6, 6)),
+                # Room 5:
+                Enemy((1, 5), state=0, reach=2),
             ]
         )
 
         env_objects = EnvironmentObjects(
-            agent=objects.Agent((11, 1), state=3),
-            target=objects.Target((21, 5), color=2),
-            walls=self.load_walls(MAP_DISTRACTIVE),
+            agent=Agent((1, 1)),
+            target=Target((7, 4), color=2),
+            walls=self.load_walls(MAP_SPARSE),
             other=other_objects,
         )
 
@@ -95,7 +107,7 @@ class DistractiveEnv(GridEngine):
 
     @override
     def check_task(self) -> bool:
-        """Check whether the agent has reached the target at the end of the right corridor.
+        """Check whether the agent has reached the green target cell.
 
         Returns
         -------
