@@ -5,7 +5,7 @@ from typing import override
 
 import numpy as np
 
-from curiosity_gym.core.objects import Agent, Ball, Target 
+from curiosity_gym.core.objects import Agent, Ball, Target, GridObject, Wall
 from curiosity_gym.envs.multitaskenv import MultitaskEnv
 
 envs = {
@@ -46,15 +46,15 @@ class TestPOVGlobal(unittest.TestCase):
         )
         ix_max = pos_max[0] + pos_max[1] * self.env.env_settings.width
 
-        self.assertEqual(
-            self.observation[0][0],
-            2,
+        self.assertIsInstance(
+            GridObject.id_map[self.observation[0][0]],
+            Wall.__class__,
             "Position (0,0) is not visible in observation with pov 'global'.",
         )
 
-        self.assertEqual(
-            self.observation[ix_max][0],
-            2,
+        self.assertIsInstance(
+            GridObject.id_map[self.observation[ix_max][0]],
+            Wall.__class__,
             f"Position ({pos_max[0]},{pos_max[1]}) is not visible in observation "
             "with pov 'global'.",
         )
